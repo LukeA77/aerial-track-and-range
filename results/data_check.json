@@ -1,0 +1,248 @@
+{
+  "data_root": "<repo>\\Data",
+  "all_ok": false,
+  "results": [
+    {
+      "name": "VisDrone2019-MOT-train",
+      "status": "ok",
+      "details": {
+        "source": "<repo>\\Data\\VisDrone2019-MOT-train.zip",
+        "format": "zip",
+        "sequences": 56,
+        "annotation_files": 56,
+        "frames": 24201,
+        "boxes": 1169359,
+        "ignored_region_rows": 62369,
+        "categories_seen": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "problems": []
+    },
+    {
+      "name": "VisDrone2019-MOT-val",
+      "status": "ok",
+      "details": {
+        "source": "<repo>\\Data\\VisDrone2019-MOT-val.zip",
+        "format": "zip",
+        "sequences": 7,
+        "annotation_files": 7,
+        "frames": 2846,
+        "boxes": 118127,
+        "ignored_region_rows": 3994,
+        "categories_seen": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "problems": []
+    },
+    {
+      "name": "VisDrone2019-MOT-test-dev",
+      "status": "ok",
+      "details": {
+        "source": "<repo>\\Data\\VisDrone2019-MOT-test-dev.zip",
+        "format": "zip",
+        "sequences": 17,
+        "annotation_files": 17,
+        "frames": 6635,
+        "boxes": 333700,
+        "ignored_region_rows": 23472,
+        "categories_seen": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "problems": []
+    },
+    {
+      "name": "VisDrone2019-DET-train",
+      "status": "missing",
+      "details": {
+        "looked_for": [
+          "<repo>\\Data\\VisDrone2019-DET-train",
+          "<repo>\\Data\\VisDrone2019-DET-train.zip"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "name": "VisDrone2019-DET-val",
+      "status": "missing",
+      "details": {
+        "looked_for": [
+          "<repo>\\Data\\VisDrone2019-DET-val",
+          "<repo>\\Data\\VisDrone2019-DET-val.zip"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "name": "midair/Kite_training/sunny",
+      "status": "missing",
+      "details": {
+        "folder": "<repo>\\Data\\midair\\Kite_training\\sunny",
+        "sensor_records": "missing",
+        "color_left": {
+          "trajectories_expected": 30,
+          "present": 0,
+          "frames": 0
+        },
+        "depth": {
+          "trajectories_expected": 30,
+          "present": 0,
+          "frames": 0
+        },
+        "normals": {
+          "trajectories_expected": 30,
+          "present": 0,
+          "frames": 0
+        },
+        "segmentation": {
+          "trajectories_expected": 30,
+          "present": 0,
+          "frames": 0
+        }
+      },
+      "problems": [
+        "sensor_records.hdf5 missing",
+        "120 of 120 trajectory folders missing"
+      ]
+    },
+    {
+      "name": "midair/PLE_training/fall",
+      "status": "missing",
+      "details": {
+        "folder": "<repo>\\Data\\midair\\PLE_training\\fall",
+        "sensor_records": "missing",
+        "color_left": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "depth": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "normals": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "segmentation": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        }
+      },
+      "problems": [
+        "sensor_records.hdf5 missing",
+        "96 of 96 trajectory folders missing"
+      ]
+    },
+    {
+      "name": "midair/PLE_training/spring",
+      "status": "missing",
+      "details": {
+        "folder": "<repo>\\Data\\midair\\PLE_training\\spring",
+        "sensor_records": "missing",
+        "color_left": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "depth": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "normals": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "segmentation": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        }
+      },
+      "problems": [
+        "sensor_records.hdf5 missing",
+        "96 of 96 trajectory folders missing"
+      ]
+    },
+    {
+      "name": "midair/PLE_training/winter",
+      "status": "missing",
+      "details": {
+        "folder": "<repo>\\Data\\midair\\PLE_training\\winter",
+        "sensor_records": "missing",
+        "color_left": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "depth": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "normals": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        },
+        "segmentation": {
+          "trajectories_expected": 24,
+          "present": 0,
+          "frames": 0
+        }
+      },
+      "problems": [
+        "sensor_records.hdf5 missing",
+        "96 of 96 trajectory folders missing"
+      ]
+    },
+    {
+      "name": "auair",
+      "status": "missing",
+      "details": {
+        "note": "data.auair_subdir is null (not downloaded)"
+      },
+      "problems": []
+    }
+  ]
+}

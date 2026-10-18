@@ -1,0 +1,5 @@
+# Tracker settings (Phase 3).
+tracker_grid:
+  value: null
+  placeholder: TRACKER_GRID
+  source: null

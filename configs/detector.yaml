@@ -1,0 +1,21 @@
+# Detector settings (Phase 3).
+detector_family:
+  value: null
+  placeholder: DETECTOR_FAMILY
+  source: null
+detector_sizes:
+  value: null
+  placeholder: DETECTOR_SIZES
+  source: null
+input_sizes:
+  value: null
+  placeholder: INPUT_SIZES
+  source: null
+train_hyperparams:
+  value: null
+  placeholder: TRAIN_HYPERPARAMS
+  source: null
+iou_match:
+  value: null
+  placeholder: IOU_MATCH
+  source: null

@@ -1,0 +1,21 @@
+# Ground-plane geometry (Section 6).
+nadir_threshold_deg:
+  value: null
+  placeholder: NADIR_THRESHOLD_DEG
+  source: null
+obj_height_m_by_class:
+  value: null
+  placeholder: OBJ_HEIGHT_M_BY_CLASS
+  source: null
+min_depression_deg:
+  value: null
+  placeholder: MIN_DEPRESSION_DEG
+  source: null
+max_range_m:
+  value: null
+  placeholder: MAX_RANGE_M
+  source: null
+kalman_q:
+  value: null
+  placeholder: KALMAN_Q
+  source: null

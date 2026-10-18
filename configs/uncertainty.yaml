@@ -1,0 +1,29 @@
+# Uncertainty model (Section 6.3).
+sigma_pix_model:
+  value: null
+  placeholder: SIGMA_PIX_MODEL
+  source: null
+sensor_noise:
+  value: null
+  placeholder: SENSOR_NOISE
+  source: null
+n_mc:
+  value: null
+  placeholder: N_MC
+  source: null
+n_boot:
+  value: null
+  placeholder: N_BOOT
+  source: null
+rel_unc_threshold:
+  value: null
+  placeholder: REL_UNC_THRESHOLD
+  source: null
+err_threshold_frac:
+  value: null
+  placeholder: ERR_THRESHOLD_FRAC
+  source: null
+nonlinear_ratio_tol:
+  value: null
+  placeholder: NONLINEAR_RATIO_TOL
+  source: "New placeholder (not in build.md Section 3): when MC/first-order range sigma ratio counts as material disagreement (Section 6.3). Set in Phase 2 from the Mid-Air curves."

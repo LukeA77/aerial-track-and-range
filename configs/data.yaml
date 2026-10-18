@@ -1,0 +1,54 @@
+# Dataset locations and Mid-Air selection. Paths are relative to the repo root unless absolute.
+# Environment variable AERIALRANGE_DATA_ROOT overrides data_root.
+data_root:
+  value: Data
+  placeholder: DATA_ROOT
+  source: "Folder found at <repo>/Data on 2026-10-18; brief path placeholder unfilled; Luke to confirm"
+visdrone_subdir:
+  value: "."
+  placeholder: DATA_ROOT
+  source: "VisDrone zips found directly in data_root on 2026-10-18"
+midair_subdir:
+  value: midair
+  placeholder: DATA_ROOT
+  source: "Folder found in data_root on 2026-10-18"
+auair_subdir:
+  value: null
+  placeholder: DATA_ROOT
+  source: null
+mot17_repo_path:
+  value: null
+  placeholder: MOT17_REPO_PATH
+  source: null
+mot17_weights_path:
+  value: null
+  placeholder: MOT17_WEIGHTS_PATH
+  source: null
+midair_climate:
+  value: null
+  placeholder: MIDAIR_CLIMATE
+  source: null
+n_traj_midair:
+  value: null
+  placeholder: N_TRAJ_MIDAIR
+  source: null
+midair_split:
+  value: null
+  placeholder: MIDAIR_SPLIT
+  source: null
+pix_per_frame:
+  value: null
+  placeholder: PIX_PER_FRAME
+  source: null
+frame_stride:
+  value: null
+  placeholder: FRAME_STRIDE
+  source: null
+edge_margin_px:
+  value: null
+  placeholder: EDGE_MARGIN_PX
+  source: null
+min_samples_per_bin:
+  value: null
+  placeholder: MIN_SAMPLES_PER_BIN
+  source: null

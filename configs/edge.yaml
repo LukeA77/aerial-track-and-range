@@ -1,0 +1,29 @@
+# Edge latency budget (Section 10).
+target_fps:
+  value: null
+  placeholder: TARGET_FPS
+  source: null
+latency_budget_ms:
+  value: null
+  placeholder: LATENCY_BUDGET_MS
+  source: "Derived: 1000 / target_fps (computed by the loader, never set by hand)"
+n_timed_frames:
+  value: null
+  placeholder: N_TIMED_FRAMES
+  source: null
+n_warmup:
+  value: null
+  placeholder: N_WARMUP
+  source: null
+n_repeats:
+  value: null
+  placeholder: N_REPEATS
+  source: null
+threads_set:
+  value: null
+  placeholder: THREADS_SET
+  source: null
+parity_tol:
+  value: null
+  placeholder: PARITY_TOL
+  source: null

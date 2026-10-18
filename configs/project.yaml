@@ -1,0 +1,21 @@
+# Project-level settings. Every value records its source (build.md R2).
+repo_name:
+  value: aerial-track-and-range
+  placeholder: REPO_NAME
+  source: "Luke, 2026-10-18 (session answer)"
+package_name:
+  value: aerialrange
+  placeholder: REPO_NAME
+  source: "Luke, 2026-10-18 (session answer)"
+licence:
+  value: AGPL-3.0-only
+  placeholder: LICENCE
+  source: "Luke chose AGPL-3.0, 2026-10-18; -only vs -or-later still to confirm"
+python_version:
+  value: "3.12"
+  placeholder: PYTHON_VERSION
+  source: "Installed interpreter (3.12.10); provisional until train/edge deps are checked (docs/decisions.md D-001)"
+seed:
+  value: 0
+  placeholder: null
+  source: "Arbitrary fixed seed for determinism (Section 5); value has no effect on correctness"
