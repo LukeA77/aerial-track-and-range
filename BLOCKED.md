@@ -5,10 +5,7 @@ Last updated: 2026-10-18.
 ## Data (Section 4)
 
 1. **VisDrone image detection (train, val) is not in the data folder.** `scripts/check_data.py` looked for `VisDrone2019-DET-train` and `VisDrone2019-DET-val` (folder or `.zip`) in `Data/` and found neither. Only the three MOT zips are there. Needed for Phase 3 (detector training). Please download them or move them into `Data/`.
-2. **Mid-Air: nothing has been downloaded yet.** `Data/midair/` holds only `download_config.txt`, the URL list from the download form. There is no `sensor_records.hdf5` and no frame folders. Needed for Phase 2.
-   - The URL list covers **four** climates, 102 trajectories in total: `Kite_training/sunny` (30 trajectories) plus `PLE_training/fall`, `spring` and `winter` (24 each). Your brief said one climate. For Phase 2, `Kite_training/sunny` alone is enough (Section 7.1). A few trajectories of one PLE climate would give the climate-invariance check.
-   - The URLs carry a personal download token. `download_config.txt` is in `.gitignore`; keep it out of git.
-   - After downloading, unzip in place so you get `Data/midair/<map>/<climate>/sensor_records.hdf5` and `<modality>/trajectory_XXXX/<frames>`, then rerun `make data-check`.
+2. **Mid-Air: downloading** (`scripts/download_midair.py`, started 2026-10-18 at your request). Kite_training/sunny without colour images, about 2.8 GB per trajectory. It stops if free disk space falls below 10 GB, and it resumes if rerun. Progress is in `Data/midair/download_log.txt`. Delete `Data/midair/Kite_training/` when we are done with it.
 3. **AU-AIR: not downloaded** (the dataset site's links are broken). Needed from Phase 4 only. When you have it, set `auair_subdir` in `configs/data.yaml`.
 4. **Confirm the data root.** Your brief left the path blank. I used `Data/` inside this repository, because that is where the files are. It is git-ignored. Tell me if you want a different location.
 

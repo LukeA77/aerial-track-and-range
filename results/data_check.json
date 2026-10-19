@@ -6,8 +6,8 @@
       "name": "VisDrone2019-MOT-train",
       "status": "ok",
       "details": {
-        "source": "<repo>\\Data\\VisDrone2019-MOT-train.zip",
-        "format": "zip",
+        "source": "<repo>\\Data\\VisDrone2019-MOT-train",
+        "format": "folder",
         "sequences": 56,
         "annotation_files": 56,
         "frames": 24201,
@@ -34,8 +34,8 @@
       "name": "VisDrone2019-MOT-val",
       "status": "ok",
       "details": {
-        "source": "<repo>\\Data\\VisDrone2019-MOT-val.zip",
-        "format": "zip",
+        "source": "<repo>\\Data\\VisDrone2019-MOT-val",
+        "format": "folder",
         "sequences": 7,
         "annotation_files": 7,
         "frames": 2846,
@@ -62,8 +62,8 @@
       "name": "VisDrone2019-MOT-test-dev",
       "status": "ok",
       "details": {
-        "source": "<repo>\\Data\\VisDrone2019-MOT-test-dev.zip",
-        "format": "zip",
+        "source": "<repo>\\Data\\VisDrone2019-MOT-test-dev",
+        "format": "folder",
         "sequences": 17,
         "annotation_files": 17,
         "frames": 6635,

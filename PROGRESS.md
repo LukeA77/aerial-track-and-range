@@ -39,3 +39,11 @@
 **Fixed during the phase:** one test was wrong, not the code. It assumed an east offset has zero north component, but the ellipsoid gives a micrometre poleward term. The test now asserts that term.
 
 **Open:** see `TASKS.md` (carried-forward items) and `docs/decisions.md` (D-102, D-104, D-110 and the reference check).
+
+## 2026-10-19: Phase 2 started (Mid-Air), on the 7 trajectories downloaded so far
+
+- `scripts/download_midair.py`: resumable downloader. Kite_training/sunny, without colour images. Running; trajectories 0 to 6 complete at the time of writing.
+- `aerialrange.data.midair`: loader (depth, segmentation, normals, intrinsics, poses, back-projection to world). 12 synthetic-fixture tests.
+- `aerialrange.evaluate.midair_unknowns` and `scripts/midair_unknowns.py`: Section 7.3 unknowns, resolved by test on real data. Results in `results/midair/unknowns.json`, decisions D-201 to D-207. Depth is radial; the quaternion is wxyz and body-to-world; the mount is the level forward mount; sky is the float16 maximum; normals decode correctly on average but scatter about 3° per pixel.
+- `tests/test_midair_real.py`: 5 real-data regression tests (skipped without data).
+- Lint clean; `pytest` 167 passed.
