@@ -1,0 +1,247 @@
+{
+  "generated_utc": "2026-10-19T15:26:28+00:00",
+  "git_commit": "e26aab9",
+  "config_hash": "355a83533a78",
+  "seed": 0,
+  "split": "development",
+  "climate": "Kite_training/sunny",
+  "trajectories": [
+    "trajectory_0002",
+    "trajectory_0003",
+    "trajectory_0004",
+    "trajectory_0006",
+    "trajectory_0008",
+    "trajectory_0010"
+  ],
+  "trajectories_missing": [
+    "trajectory_0011",
+    "trajectory_0016",
+    "trajectory_0018",
+    "trajectory_0021",
+    "trajectory_0023",
+    "trajectory_0025",
+    "trajectory_0026",
+    "trajectory_0028",
+    "trajectory_0029"
+  ],
+  "sampling": {
+    "pix_per_frame": 500,
+    "frame_stride": 25,
+    "edge_margin_px": 3,
+    "depth_edge_rel": 0.1,
+    "normal_patch_px": 9
+  },
+  "note": "Point summaries pooled over samples; trajectory-bootstrap intervals not yet computed ({{N_BOOT}} unresolved).",
+  "pooled": {
+    "oracle_plane": {
+      "n_samples": 267500,
+      "valid_fraction": 0.8837308411214954,
+      "signed_range_err_median_m": -0.033962104431262574,
+      "abs_range_err_median_m": 1.6641330760696125,
+      "abs_range_err_mean_m": 91.78220299683193,
+      "range_rmse_m": 6222.504949368933,
+      "abs_range_err_p90_m": 40.29207902346566,
+      "abs_range_err_p95_m": 160.6331891663547,
+      "rel_range_err_median": 0.11271956745840575,
+      "rel_range_err_p90": 0.6454056484699515,
+      "horiz_err_median_m": 1.3625277484435565,
+      "horiz_err_p95_m": 158.5388182157718
+    },
+    "relative_altitude": {
+      "n_samples": 267500,
+      "valid_fraction": 0.5007177570093458,
+      "signed_range_err_median_m": 16.725319620738418,
+      "abs_range_err_median_m": 24.50874759111772,
+      "abs_range_err_mean_m": 205.50300583619023,
+      "range_rmse_m": 5306.380432322572,
+      "abs_range_err_p90_m": 174.96258097458235,
+      "abs_range_err_p95_m": 368.32642089307177,
+      "rel_range_err_median": 0.960638655063295,
+      "rel_range_err_p90": 11.172543798986162,
+      "horiz_err_median_m": 20.32185964633074,
+      "horiz_err_p95_m": 364.067838334081
+    }
+  },
+  "per_trajectory": {
+    "trajectory_0002": {
+      "oracle_plane": {
+        "n_samples": 44500,
+        "valid_fraction": 0.8993932584269663,
+        "signed_range_err_median_m": -0.043238312872169615,
+        "abs_range_err_median_m": 0.6741449212066399,
+        "abs_range_err_mean_m": 32.7306876576037,
+        "range_rmse_m": 1498.0587453020519,
+        "abs_range_err_p90_m": 22.777734489751033,
+        "abs_range_err_p95_m": 62.56827496232271,
+        "rel_range_err_median": 0.07532753811157589,
+        "rel_range_err_p90": 0.5114966112490655,
+        "horiz_err_median_m": 0.5837415562071113,
+        "horiz_err_p95_m": 60.61852966682102
+      },
+      "relative_altitude": {
+        "n_samples": 44500,
+        "valid_fraction": 0.34793258426966295,
+        "signed_range_err_median_m": -4.617073318169981,
+        "abs_range_err_median_m": 21.27907620264603,
+        "abs_range_err_mean_m": 113.79944325585333,
+        "range_rmse_m": 5161.5950350859375,
+        "abs_range_err_p90_m": 71.44821824614051,
+        "abs_range_err_p95_m": 113.92166319322114,
+        "rel_range_err_median": 0.6570409496683539,
+        "rel_range_err_p90": 1.8010043079474536,
+        "horiz_err_median_m": 17.29460004079406,
+        "horiz_err_p95_m": 113.1765141243038
+      }
+    },
+    "trajectory_0003": {
+      "oracle_plane": {
+        "n_samples": 44500,
+        "valid_fraction": 0.8067191011235955,
+        "signed_range_err_median_m": -0.013058116879346215,
+        "abs_range_err_median_m": 0.03648089385526987,
+        "abs_range_err_mean_m": 95.03866405422026,
+        "range_rmse_m": 5575.644596571362,
+        "abs_range_err_p90_m": 1.0418506518761605,
+        "abs_range_err_p95_m": 58.07604751223132,
+        "rel_range_err_median": 0.001153523309883925,
+        "rel_range_err_p90": 0.006980537773550843,
+        "horiz_err_median_m": 0.026639378184742473,
+        "horiz_err_p95_m": 57.63456968827525
+      },
+      "relative_altitude": {
+        "n_samples": 44500,
+        "valid_fraction": 0.8067191011235955,
+        "signed_range_err_median_m": -0.15926626646168884,
+        "abs_range_err_median_m": 0.16957881025270183,
+        "abs_range_err_mean_m": 94.58351355292207,
+        "range_rmse_m": 5542.524710332778,
+        "abs_range_err_p90_m": 0.47697717966434333,
+        "abs_range_err_p95_m": 57.349188100543174,
+        "rel_range_err_median": 0.005564286494575669,
+        "rel_range_err_p90": 0.01634121150689323,
+        "horiz_err_median_m": 0.13482203614671723,
+        "horiz_err_p95_m": 56.863640229861616
+      }
+    },
+    "trajectory_0004": {
+      "oracle_plane": {
+        "n_samples": 45000,
+        "valid_fraction": 0.9113777777777777,
+        "signed_range_err_median_m": -0.32982126157922753,
+        "abs_range_err_median_m": 3.1017510380515736,
+        "abs_range_err_mean_m": 206.3640568388856,
+        "range_rmse_m": 13758.943955832376,
+        "abs_range_err_p90_m": 284.4155307476931,
+        "abs_range_err_p95_m": 653.055916413808,
+        "rel_range_err_median": 0.15114621887641602,
+        "rel_range_err_p90": 0.8064235204803484,
+        "horiz_err_median_m": 2.4864268581202076,
+        "horiz_err_p95_m": 640.9435582585609
+      },
+      "relative_altitude": {
+        "n_samples": 45000,
+        "valid_fraction": 0.02891111111111111,
+        "signed_range_err_median_m": -10.689160060699924,
+        "abs_range_err_median_m": 10.797639825083714,
+        "abs_range_err_mean_m": 321.91594684246775,
+        "range_rmse_m": 839.0144604121417,
+        "abs_range_err_p90_m": 1059.1000499507388,
+        "abs_range_err_p95_m": 2010.446584023351,
+        "rel_range_err_median": 0.5534618343343626,
+        "rel_range_err_p90": 0.952549842324843,
+        "horiz_err_median_m": 8.66618158033282,
+        "horiz_err_p95_m": 1995.7261181374035
+      }
+    },
+    "trajectory_0006": {
+      "oracle_plane": {
+        "n_samples": 44500,
+        "valid_fraction": 0.9197752808988764,
+        "signed_range_err_median_m": -0.2163019561025239,
+        "abs_range_err_median_m": 1.706514871731152,
+        "abs_range_err_mean_m": 19.210927425334447,
+        "range_rmse_m": 438.4900766109213,
+        "abs_range_err_p90_m": 15.659698192601493,
+        "abs_range_err_p95_m": 34.46378165172783,
+        "rel_range_err_median": 0.19198778734792205,
+        "rel_range_err_p90": 0.6744658199182348,
+        "horiz_err_median_m": 1.4297226034317831,
+        "horiz_err_p95_m": 33.75495954481954
+      },
+      "relative_altitude": {
+        "n_samples": 44500,
+        "valid_fraction": 0.9197752808988764,
+        "signed_range_err_median_m": 69.76794759481875,
+        "abs_range_err_median_m": 69.76794759481875,
+        "abs_range_err_mean_m": 187.27766470753923,
+        "range_rmse_m": 2825.2454077162033,
+        "abs_range_err_p90_m": 200.99330338118756,
+        "abs_range_err_p95_m": 363.9193197748328,
+        "rel_range_err_median": 5.432673971799657,
+        "rel_range_err_p90": 19.718616113792635,
+        "horiz_err_median_m": 54.536780595747274,
+        "horiz_err_p95_m": 360.8554279188999
+      }
+    },
+    "trajectory_0008": {
+      "oracle_plane": {
+        "n_samples": 44500,
+        "valid_fraction": 0.8569213483146068,
+        "signed_range_err_median_m": -0.9654338160598783,
+        "abs_range_err_median_m": 4.754792287395656,
+        "abs_range_err_mean_m": 140.41305560869702,
+        "range_rmse_m": 1983.577632181745,
+        "abs_range_err_p90_m": 96.46883152711872,
+        "abs_range_err_p95_m": 329.86129349532456,
+        "rel_range_err_median": 0.18958651136005153,
+        "rel_range_err_p90": 0.758883462855871,
+        "horiz_err_median_m": 3.8844172376772472,
+        "horiz_err_p95_m": 326.58620023326466
+      },
+      "relative_altitude": {
+        "n_samples": 44500,
+        "valid_fraction": 0.6369438202247191,
+        "signed_range_err_median_m": 78.39283493315035,
+        "abs_range_err_median_m": 85.96393895054376,
+        "abs_range_err_mean_m": 445.47561672295956,
+        "range_rmse_m": 8071.3140561147275,
+        "abs_range_err_p90_m": 402.99580838527396,
+        "abs_range_err_p95_m": 791.406092875198,
+        "rel_range_err_median": 2.220790605871077,
+        "rel_range_err_p90": 9.302207972859549,
+        "horiz_err_median_m": 67.56261623573866,
+        "horiz_err_p95_m": 788.6143033969407
+      }
+    },
+    "trajectory_0010": {
+      "oracle_plane": {
+        "n_samples": 44500,
+        "valid_fraction": 0.9078876404494381,
+        "signed_range_err_median_m": -0.30832601421212935,
+        "abs_range_err_median_m": 3.265577644555801,
+        "abs_range_err_mean_m": 58.69356953839241,
+        "range_rmse_m": 795.3868717620387,
+        "abs_range_err_p90_m": 39.84039122029497,
+        "abs_range_err_p95_m": 119.13489661426115,
+        "rel_range_err_median": 0.15093587352115764,
+        "rel_range_err_p90": 0.7011196393956539,
+        "horiz_err_median_m": 2.700298008596739,
+        "horiz_err_p95_m": 116.52327470144064
+      },
+      "relative_altitude": {
+        "n_samples": 44500,
+        "valid_fraction": 0.26932584269662924,
+        "signed_range_err_median_m": 18.157711072048937,
+        "abs_range_err_median_m": 26.15536619866778,
+        "abs_range_err_mean_m": 138.2916087632097,
+        "range_rmse_m": 2616.861898750883,
+        "abs_range_err_p90_m": 121.56952207524732,
+        "abs_range_err_p95_m": 274.12543456745686,
+        "rel_range_err_median": 0.8514709566751021,
+        "rel_range_err_p90": 6.464509861689964,
+        "horiz_err_median_m": 20.954895864511723,
+        "horiz_err_p95_m": 273.8070767835297
+      }
+    }
+  }
+}

@@ -22,18 +22,33 @@
 - [x] 7.2 loader with synthetic tests
 - [x] 7.3 unknowns resolved by test (depth radial, quaternion, mount) on trajectories 0 to 6
 - [ ] Download complete (running)
-- [ ] Trajectory split (`{{MIDAIR_SPLIT}}`), proposal for Luke
+- [x] Trajectory split (`{{MIDAIR_SPLIT}}`), approved by Luke 2026-10-19
 - [ ] Mount-offset check on the development split
-- [ ] 7.5 three estimation modes; 7.6 sampling and strata; 7.7 metrics; 7.8 outputs and figures
+- [x] 7.6 sampling (development values, D-209); oracle_plane and relative_altitude modes
+- [x] 7.5 noisy_inputs mode and sweep design (D-212); headline noise from AU-AIR later
+- [x] 7.7 binned curves with trajectory bootstrap, first order vs Monte Carlo overlay (code; N_BOOT, N_MC set, D-215)
+- [x] 7.7 calibration, recalibration scalar, flag, tornado (code); needs `{{ERR_THRESHOLD_FRAC}}` from Luke
+- [x] H4 tilted-plane and local-slope diagnostics (code, D-211)
+- [x] 7.8 figures and CSV tables (code)
+- [ ] Sensitivity of edge margin and normal patch (after full download)
+- [ ] Full development and calibration runs (after full download)
+- [ ] Final test-split run, once, after freezing
 
-## Phase 3: tracking baseline (needs data)
-- [ ] Section 9
+## Phase 3: tracking baseline
+- [x] Data check, MOT ground-truth conversion, YOLO set, DET/MOT overlap check and leakage exclusion (D-308)
+- [x] Tracking evaluation (motmetrics), detection AP by size, tiling, runner, training script
+- [x] B0 (YOLO26n, 640, ByteTrack) on val
+- [ ] B0 variants (sizes, BoT-SORT with and without camera-motion compensation), detection AP for B0
+- [ ] B2 fine-tuning (compute decision needed)
+- [ ] B3 tiling; tracker grid on val; pixel-noise fit `{{SIGMA_PIX_MODEL}}`; failure gallery
+- [ ] Test-dev once; H1 table
 
 ## Phase 4: AU-AIR and integration (needs AU-AIR)
 - [ ] Section 8 and 11.1
 
 ## Phase 5: edge budget
-- [ ] Section 10
+- [x] Benchmark harness (per-stage percentiles, budget verdict)
+- [ ] ONNX export and parity, quantisation, protocol runs, Pareto (needs TARGET_FPS)
 
 ## Phase 6: deliverables and polish
 - [ ] Section 13 and the release checklist (Section 16)

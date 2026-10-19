@@ -19,6 +19,8 @@ from aerialrange.data.check import check_all
 from aerialrange.utils.config import REPO_ROOT, load_config
 
 OUT = REPO_ROOT / "results" / "data_check.json"
+# Modalities the Mid-Air evaluation reads (Section 7.1; colour images are optional and unused).
+MIDAIR_MODALITIES = ["depth", "segmentation", "normals"]
 
 
 def _resolve(root: Path, sub: str | None) -> Path | None:
@@ -41,9 +43,12 @@ def main(argv: list[str] | None = None) -> int:
 
     results = check_all(
         root,
-        visdrone=_resolve(root, cfg.get("visdrone_subdir")) or root,
+        visdrone_mot=_resolve(root, cfg.get("visdrone_mot_subdir")) or root,
+        visdrone_det=_resolve(root, cfg.get("visdrone_det_subdir")) or root,
         midair=_resolve(root, cfg.get("midair_subdir")) or root / "midair",
         auair=_resolve(root, cfg.get("auair_subdir")),
+        midair_climates=[cfg.get("midair_climate")] if cfg.get("midair_climate") else None,
+        midair_modalities=MIDAIR_MODALITIES,
     )
 
     print(f"Data root: {root}\n")

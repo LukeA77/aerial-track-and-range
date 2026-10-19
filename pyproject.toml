@@ -17,12 +17,15 @@ dependencies = [
     "typer",
     "h5py",
     "pillow",
+    "matplotlib",
+    "pandas",
+    "motmetrics",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff"]
-train = []  # Phase 3: detector library, OpenCV, pandas, py-motmetrics
-edge = []   # Phase 5: onnx, onnxruntime
+train = ["torch", "torchvision", "ultralytics", "opencv-python-headless", "lap"]  # AGPL-3.0 (R8)
+edge = ["onnx", "onnxruntime", "onnxslim"]
 
 [project.scripts]
 aerialrange = "aerialrange.cli:app"

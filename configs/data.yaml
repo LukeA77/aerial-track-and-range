@@ -4,10 +4,14 @@ data_root:
   value: Data
   placeholder: DATA_ROOT
   source: "Folder found at <repo>/Data on 2026-10-18; brief path placeholder unfilled; Luke to confirm"
-visdrone_subdir:
-  value: "."
+visdrone_mot_subdir:
+  value: VisDrone-MOT
   placeholder: DATA_ROOT
-  source: "VisDrone zips found directly in data_root on 2026-10-18"
+  source: "Luke reorganised the data folder; found 2026-10-19"
+visdrone_det_subdir:
+  value: VisDrone-DET
+  placeholder: DATA_ROOT
+  source: "Luke reorganised the data folder; found 2026-10-19"
 midair_subdir:
   value: midair
   placeholder: DATA_ROOT
@@ -25,30 +29,46 @@ mot17_weights_path:
   placeholder: MOT17_WEIGHTS_PATH
   source: null
 midair_climate:
-  value: null
+  value: Kite_training/sunny
   placeholder: MIDAIR_CLIMATE
-  source: null
+  source: "Downloaded by Claude at Luke's request 2026-10-18 (one climate is enough, Section 7.1)"
 n_traj_midair:
   value: null
   placeholder: N_TRAJ_MIDAIR
   source: null
 midair_split:
-  value: null
+  value: {development: 0.5, calibration: 0.2, test: 0.3}
   placeholder: MIDAIR_SPLIT
-  source: null
+  source: "Proposed by Claude, approved by Luke 2026-10-19; by trajectory, seeded (docs/decisions.md D-208)"
 pix_per_frame:
-  value: null
+  value: 500
   placeholder: PIX_PER_FRAME
-  source: null
+  source: "Claude 2026-10-19: development value; revisited once bins are populated (D-209)"
 frame_stride:
-  value: null
+  value: 25
   placeholder: FRAME_STRIDE
-  source: null
+  source: "Claude 2026-10-19: one frame per second, since 25 Hz frames are strongly correlated (D-209)"
 edge_margin_px:
-  value: null
+  value: 3
   placeholder: EDGE_MARGIN_PX
-  source: null
+  source: "Claude 2026-10-19: clears anti-aliased edge pixels with margin; sensitivity to be shown (D-209)"
 min_samples_per_bin:
-  value: null
+  value: 100
   placeholder: MIN_SAMPLES_PER_BIN
-  source: null
+  source: "Claude 2026-10-19: at 100 samples a 90th percentile rests on 10 samples above it; applied to every binned result (D-213)"
+depth_edge_rel:
+  value: 0.1
+  placeholder: DEPTH_EDGE_REL
+  source: "New placeholder. Measured on development frames 2026-10-19: neighbour depth-jump histogram flattens into its discontinuity tail near 0.1; above the 99th percentile of ground-ground jumps, 0.053 (D-209)"
+normal_patch_px:
+  value: 9
+  placeholder: NORMAL_PATCH_PX
+  source: "New placeholder. Claude 2026-10-19: per-pixel normal scatter is about 3 degrees (D-206); 9x9 normals pixels averages it down; sensitivity to be shown (D-209)"
+min_groups_per_bin:
+  value: 3
+  placeholder: MIN_GROUPS_PER_BIN
+  source: "New placeholder. Claude 2026-10-19: intervals resample whole trajectories, so a bin from fewer than 3 trajectories has no meaningful interval (D-213)"
+visdrone_eval_groups:
+  value: {person: [1, 2], vehicle: [4, 5, 6, 9]}
+  placeholder: null
+  source: "build.md Section 9.1: person = pedestrian, people; vehicle = car, van, truck, bus; others (11) excluded; ignored regions (0) used to drop predictions"

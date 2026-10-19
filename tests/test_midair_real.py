@@ -1,7 +1,7 @@
 """Regression tests on REAL Mid-Air data (build.md Section 7.3, risk R2).
 
 Skipped when the data is absent (CI has no datasets). Thresholds sit well outside the values
-measured on Kite_training/sunny trajectories 0-6 (results/midair/unknowns.json), so they
+measured on the development trajectories (results/midair/unknowns.json), so they
 catch a wrong convention, not small changes.
 """
 
@@ -13,13 +13,13 @@ from aerialrange.utils.config import REPO_ROOT, load_config
 
 _data = load_config("data")
 ROOT = REPO_ROOT / _data.get("data_root") / _data.get("midair_subdir") / "Kite_training" / "sunny"
-NAME = "trajectory_0000"
+NAME = "trajectory_0002"  # development split (results/splits.json)
 pytestmark = pytest.mark.skipif(
     not (ROOT / "sensor_records.hdf5").exists()
     or not all(
         (ROOT / m / NAME / ".frames.done").exists() for m in ("depth", "segmentation", "normals")
     ),
-    reason="Mid-Air Kite_training/sunny trajectory_0000 not downloaded",
+    reason="Mid-Air Kite_training/sunny trajectory_0002 not downloaded",
 )
 
 

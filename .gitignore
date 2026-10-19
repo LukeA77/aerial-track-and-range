@@ -32,3 +32,6 @@ htmlcov/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Per-sample evaluation caches (large, regenerable)
+cache/

@@ -19,7 +19,12 @@ from scipy.stats import norm
 
 from aerialrange.geometry.camera import Camera, Pose, pixel_to_world_ray
 from aerialrange.geometry.frames import R_wb_from_ypr, rot_y, ypr_from_R_wb
-from aerialrange.geometry.ranging import MonteCarloSummary, RangeEstimate, estimate_range
+from aerialrange.geometry.ranging import (
+    MonteCarloSummary,
+    RangeEstimate,
+    estimate_range,
+    estimate_range_batch,
+)
 
 PARAMS = ("u", "v", "h", "roll", "pitch", "yaw", "tilt", "fx", "fy", "cx", "cy", "obj_height")
 
@@ -266,3 +271,118 @@ def reliability_flags(
     if est.depression_deg < min_depression_deg:
         flags.append("below_min_depression")
     return tuple(flags)
+
+
+def _batch_model(
+    cam: Camera, pose: Pose, uv: NDArray, h: NDArray
+) -> Callable[[Mapping[str, NDArray | float]], NDArray]:
+    """Ground points (N, 3) under per-sample perturbations (NaN where invalid)."""
+    yaw0, pitch0, roll0 = ypr_from_R_wb(pose.R_wb)
+
+    def f(d: Mapping[str, NDArray | float]) -> NDArray:
+        g = {p: d.get(p, 0.0) for p in PARAMS}
+        frame_keys = ("roll", "pitch", "yaw", "tilt", "fx", "fy", "cx", "cy")
+        frame_vals = np.broadcast_arrays(
+            *[np.asarray(g[p], float) for p in frame_keys], np.zeros(len(uv))
+        )[:-1]
+        out = np.full((len(uv), 3), np.nan)
+        # Group samples that share the same per-frame perturbation (usually all or one).
+        stacked = np.stack(frame_vals, axis=1)
+        uniq, inv = np.unique(stacked, axis=0, return_inverse=True)
+        for j, vals in enumerate(uniq):
+            v = dict(zip(frame_keys, vals, strict=True))
+            idx = np.nonzero(inv.ravel() == j)[0]
+            c = Camera.pinhole(
+                cam.fx + v["fx"],
+                cam.fy + v["fy"],
+                cam.cx + v["cx"],
+                cam.cy + v["cy"],
+                R_bc=rot_y(-v["tilt"]) @ cam.R_bc,
+                t_bc=cam.t_bc,
+                dist=cam.dist,
+            )
+            p = Pose(
+                pose.p_w, R_wb_from_ypr(yaw0 + v["yaw"], pitch0 + v["pitch"], roll0 + v["roll"])
+            )
+            du = np.broadcast_to(np.asarray(g["u"], float), (len(uv),))[idx]
+            dv = np.broadcast_to(np.asarray(g["v"], float), (len(uv),))[idx]
+            dh = np.broadcast_to(np.asarray(g["h"], float), (len(uv),))[idx]
+            hh = np.broadcast_to(h, (len(uv),))[idx]
+            r = estimate_range_batch(c, p, uv[idx] + np.stack([du, dv], axis=1), hh + dh)
+            out[idx] = np.where(r["valid"][:, None], r["point_w"], np.nan)
+        return out
+
+    return f
+
+
+def propagate_batch(
+    cam: Camera,
+    pose: Pose,
+    uv: ArrayLike,
+    h: ArrayLike,
+    sigmas: Mapping[str, ArrayLike],
+    correlations: Correlations | None = None,
+) -> dict[str, NDArray]:
+    """Vectorised first-order propagation for `bottom_centre` on a horizontal plane.
+
+    `sigmas` values may be scalars or (N,) arrays (for example per-pixel u, v noise). Same
+    step rule and outputs as `propagate_uncertainty` (tested to match). Returns the
+    `estimate_range_batch` arrays plus cov_ne (N, 2, 2), range_sigma_m, ground_dist_sigma_m.
+    """
+    uv = np.atleast_2d(np.asarray(uv, float))
+    n = len(uv)
+    h = np.broadcast_to(np.asarray(h, float), (n,))
+    unknown = set(sigmas) - set(PARAMS)
+    if unknown:
+        raise ValueError(f"unknown parameters {sorted(unknown)}")
+    sig = {
+        p: np.broadcast_to(np.asarray(sigmas[p], float), (n,))
+        for p in PARAMS
+        if p in sigmas and np.any(np.asarray(sigmas[p]) > 0)
+    }
+    names = list(sig)
+    nominal = estimate_range_batch(cam, pose, uv, h)
+    yaw, pitch, roll = ypr_from_R_wb(pose.R_wb)
+    theta = {
+        "u": uv[:, 0],
+        "v": uv[:, 1],
+        "h": h,
+        "roll": roll,
+        "pitch": pitch,
+        "yaw": yaw,
+        "tilt": 0.0,
+        "fx": cam.fx,
+        "fy": cam.fy,
+        "cx": cam.cx,
+        "cy": cam.cy,
+    }
+    f = _batch_model(cam, pose, uv, h)
+    J = np.zeros((n, 3, len(names)))
+    for i, p in enumerate(names):
+        step = _REL_STEP * np.maximum(np.abs(np.broadcast_to(theta[p], (n,))), sig[p])
+        if p in ("u", "v", "h"):
+            J[:, :, i] = (f({p: step}) - f({p: -step})) / (2 * step[:, None])
+        else:  # per-frame parameter: one shared step keeps the frame grouping intact
+            s = float(np.max(step))
+            J[:, :, i] = (f({p: s}) - f({p: -s})) / (2 * s)
+    s_mat = np.stack([sig[p] for p in names], axis=1) if names else np.zeros((n, 0))
+    R = np.eye(len(names))
+    for (a, b), rho in (correlations or {}).items():
+        i, j = names.index(a), names.index(b)
+        R[i, j] = R[j, i] = rho
+    S = s_mat[:, :, None] * R[None] * s_mat[:, None, :]
+    S_P = np.einsum("nik,nkl,njl->nij", J, S, J)
+    C, _ = pixel_to_world_ray(cam, pose, uv[:1])
+    r_vec = nominal["point_w"] - C
+    r = np.linalg.norm(r_vec, axis=1)
+    g_r = r_vec / r[:, None]
+    gd = np.hypot(r_vec[:, 0], r_vec[:, 1])
+    g_gd = np.stack([r_vec[:, 0] / gd, r_vec[:, 1] / gd, np.zeros(n)], axis=1)
+    out = dict(nominal)
+    out["cov_ne"] = S_P[:, :2, :2]
+    # Clamp rounding-level negatives (as the scalar version does) before the square root.
+    out["range_sigma_m"] = np.sqrt(np.maximum(np.einsum("ni,nij,nj->n", g_r, S_P, g_r), 0.0))
+    out["ground_dist_sigma_m"] = np.sqrt(
+        np.maximum(np.einsum("ni,nij,nj->n", g_gd, S_P, g_gd), 0.0)
+    )
+    return out

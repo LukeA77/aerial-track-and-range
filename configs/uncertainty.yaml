@@ -8,13 +8,13 @@ sensor_noise:
   placeholder: SENSOR_NOISE
   source: null
 n_mc:
-  value: null
+  value: 1000
   placeholder: N_MC
-  source: null
+  source: "Stability check 2026-10-19: per-sample MC range sigma changes by a median 1.8 % (95th percentile 6.1 %) between 1000 and 2000 draws, consistent with 1/sqrt(2n) (D-215)"
 n_boot:
-  value: null
+  value: 1000
   placeholder: N_BOOT
-  source: null
+  source: "Stability check 2026-10-19 (results/midair/development/stability.json): interval endpoints move by at most 1 % of the interval width between 1000 and 2000 resamples (D-215)"
 rel_unc_threshold:
   value: null
   placeholder: REL_UNC_THRESHOLD
@@ -27,3 +27,14 @@ nonlinear_ratio_tol:
   value: null
   placeholder: NONLINEAR_RATIO_TOL
   source: "New placeholder (not in build.md Section 3): when MC/first-order range sigma ratio counts as material disagreement (Section 6.3). Set in Phase 2 from the Mid-Air curves."
+midair_noise_sweep:
+  value:
+    low: {pixel_px: 0.5, height_m: 0.1, attitude_deg: 0.1, tilt_deg: 0.1, focal_frac: 0.0025}
+    mid: {pixel_px: 2.0, height_m: 0.5, attitude_deg: 0.5, tilt_deg: 0.5, focal_frac: 0.01}
+    high: {pixel_px: 5.0, height_m: 2.0, attitude_deg: 2.0, tilt_deg: 2.0, focal_frac: 0.04}
+  placeholder: SENSOR_NOISE
+  source: "Sweep design by Claude 2026-10-19 (Section 7.5: sweep and report). Spans sub-degree to multi-degree attitude error and decimetre to metre height error. These are NOT headline values: headline sensor noise comes from AU-AIR hover segments (Section 8.5) and is justified in docs/decisions.md D-212."
+err_threshold_sweep:
+  value: [0.05, 0.1, 0.2, 0.5]
+  placeholder: ERR_THRESHOLD_FRAC
+  source: "Sweep design by Claude 2026-10-19 (Section 7.7: sweep, report the full PR curve, then fix one operating point on the calibration split). The single {{ERR_THRESHOLD_FRAC}} is chosen in scripts/midair_calibrate.py on the calibration split."

@@ -188,3 +188,39 @@ def estimate_range(
         valid=True,
         reason=REASON_OK,
     )
+
+
+def estimate_range_batch(
+    cam: Camera, pose: Pose, uv: ArrayLike, h_above_plane: ArrayLike
+) -> dict[str, NDArray]:
+    """Vectorised `estimate_range` for `bottom_centre` mode on a horizontal plane.
+
+    `uv` is (N, 2) pixels; `h_above_plane` is a scalar or (N,) array (metres). Returns arrays:
+    point_w (N, 3), range_m, ground_dist_m, azimuth_deg, depression_deg, valid (bool), and
+    reason (str). Invalid entries hold NaN. Matches `estimate_range` element by element
+    (tested).
+    """
+    C, d = pixel_to_world_ray(cam, pose, np.atleast_2d(np.asarray(uv, float)))
+    n = len(d)
+    h = np.broadcast_to(np.asarray(h_above_plane, float), (n,))
+    horiz = np.hypot(d[:, 0], d[:, 1])
+    depression = np.degrees(np.arctan2(d[:, 2], horiz))
+    above = h > 0
+    below_horizon = d[:, 2] > 0
+    valid = above & below_horizon
+    reason = np.where(
+        ~above, REASON_NOT_ABOVE_PLANE, np.where(~below_horizon, REASON_ABOVE_HORIZON, REASON_OK)
+    )
+    with np.errstate(divide="ignore", invalid="ignore"):
+        lam = np.where(valid, h / d[:, 2], np.nan)
+    P = C + lam[:, None] * d
+    dn, de = P[:, 0] - C[0], P[:, 1] - C[1]
+    return {
+        "point_w": P,
+        "range_m": lam * np.linalg.norm(d, axis=1),
+        "ground_dist_m": np.hypot(dn, de),
+        "azimuth_deg": np.degrees(np.arctan2(de, dn)) % 360.0,
+        "depression_deg": depression,
+        "valid": valid,
+        "reason": reason,
+    }

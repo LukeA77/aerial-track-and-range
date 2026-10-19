@@ -6,7 +6,7 @@ else
 PY ?= .venv/bin/python
 endif
 
-.PHONY: setup lint test data-check env midair-eval auair-prep auair-eval visdrone-prep \
+.PHONY: setup setup-train lint test data-check env midair-eval auair-prep auair-eval visdrone-prep \
         train track-eval export bench demo docs all-results
 
 setup:
@@ -14,6 +14,9 @@ setup:
 	$(PY) -m pip install --upgrade pip
 	$(PY) -m pip install -r requirements-lock.txt
 	$(PY) -m pip install -e . --no-deps
+
+setup-train: setup
+	$(PY) -m pip install -r requirements-train-lock.txt
 
 lint:
 	$(PY) -m ruff check src tests scripts
@@ -28,5 +31,18 @@ data-check:
 env:
 	$(PY) scripts/env_report.py
 
-midair-eval auair-prep auair-eval visdrone-prep train track-eval export bench demo docs all-results:
+# Mid-Air development and calibration work. The test split is NOT run here (R5); see
+# docs/runbook.md for the one-off --final commands.
+midair-eval:
+	$(PY) scripts/make_splits.py
+	$(PY) scripts/midair_eval.py --split development
+	$(PY) scripts/midair_eval.py --split calibration
+	$(PY) scripts/midair_analyse.py --split development
+	$(PY) scripts/midair_analyse.py --split calibration
+
+visdrone-prep:
+	$(PY) scripts/visdrone_overlap.py
+	$(PY) scripts/visdrone_prep.py --mot --det
+
+auair-prep auair-eval train track-eval export bench demo docs all-results:
 	@echo "'$@' is not implemented yet (later phase; see build.md Section 12)." && exit 1
