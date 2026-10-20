@@ -21,9 +21,9 @@ auair_subdir:
   placeholder: DATA_ROOT
   source: null
 mot17_repo_path:
-  value: null
+  value: "https://github.com/LukeA77/MOT_Tracking@455e7025be7fce26d4d5839b894a11f663f09129"
   placeholder: MOT17_REPO_PATH
-  source: null
+  source: "Luke 2026-10-19; metrics copied to results/mot17_reference/metrics.json with the commit"
 mot17_weights_path:
   value: null
   placeholder: MOT17_WEIGHTS_PATH

@@ -2,18 +2,13 @@
 
 Last updated: 2026-10-19.
 
-## Decisions needed now (Phases 2 and 3)
+## Decisions needed now
 
-1. **`{{ERR_THRESHOLD_FRAC}}`: what counts as a "large" ranging error?** This one value sets the reliability flag's labels and the usable depression-angle and range limits (D-311). The swept candidates are 5 %, 10 %, 20 % and 50 % relative range error. I suggest deciding once the development curves are complete.
-2. **Detector training compute (baseline B2).** This machine has no NVIDIA GPU. CPU fine-tuning works but is slow, and I will measure one epoch's time before proposing a schedule. The alternative is a free notebook GPU (Colab or Kaggle), which means you upload VisDrone DET there (about 1.5 GB) under the dataset's terms. That is your call; I will not upload anything.
-3. **VisDrone overlap finding (D-308).** Some DET images come from the same source videos as MOT val and test-dev clips, which contradicts the claim in build.md Section 4.1. I excluded those 78 images (1.1 %) from training and model selection to avoid leakage. Tell me if you would rather handle it differently.
+1. **Uncertainty on rough terrain (H3).** Luke wants a solution, not a "cannot". Options are being brainstormed with Luke.
+2. **GPU training run.** Luke uploads `cache/gpu_package/visdrone_yolo.zip` to Kaggle (private) and runs `gpu/train_b2_kaggle.py`, following `docs/gpu_training.md`.
+3. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
 
-4. **Uncertainty model scope (H3), from the development run.** The propagated sigma covers sensor noise only. On Mid-Air the terrain error dominates, so intervals are badly over-confident and heavy-tailed: at the mid noise level the z spread is about 22, against a robust spread of about 3. One recalibration scalar (Section 7.7) cannot fix that shape. Options:
-   - (a) Keep the model as specified, report H3 as not supported on rough terrain, and show the scalar's effect honestly.
-   - (b) Add an explicit terrain-relief term to the input covariance, fitted on the development split only. That is a model change beyond Section 6.3.
-   - (c) Report calibration separately for flat ground (low slope) and rough ground.
-
-   I recommend (a) plus (c): it stays within the spec, is honest, and is informative. (b) is a reasonable later extension.
+Resolved 2026-10-19 (D-314): large-error threshold 10 %; overlap exclusion approved; MOT17 repository linked; duplicate folders confirmed safe to delete.
 
 ## Data (Section 4)
 

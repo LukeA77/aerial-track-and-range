@@ -1,6 +1,6 @@
 {
- "generated_utc": "2026-10-19T16:05:01+00:00",
- "git_commit": "e26aab9",
+ "generated_utc": "2026-10-19T23:32:50+00:00",
+ "git_commit": "50aa1ea",
  "run": "B0_yolo26n_640_bytetrack",
  "split": "val",
  "weights": "yolo26n.pt",
@@ -8,6 +8,7 @@
  "tracker": "bytetrack.yaml",
  "class_map": "coco",
  "iou_match": 0.5,
+ "max_det": 1000,
  "ultralytics": "8.4.182",
  "sequences": [
   "uav0000086_00000_v",
@@ -20,7 +21,7 @@
  ],
  "timing_note": "Wall time of detector+tracker calls; not a latency benchmark (Section 10.4 protocol not applied).",
  "timing": {
-  "track_seconds": 370.0685470000135,
+  "track_seconds": 393.7229401999357,
   "frames": 2846
  },
  "metrics": {

@@ -1,8 +1,8 @@
 # Uncertainty model (Section 6.3).
 sigma_pix_model:
-  value: null
+  value: {"person": {"kappa_u": 0.1093, "kappa_v": 0.086}, "vehicle": {"kappa_u": 0.0392, "kappa_v": 0.052}}
   placeholder: SIGMA_PIX_MODEL
-  source: null
+  source: "Measured 2026-10-20: results/visdrone/val/pixel_noise.json, B2 detector (YOLO26n 640) against MOT-val ground truth, IoU >= 0.5, bottom-centre contact point, robust sigma of error / box size (Section 6.3)"
 sensor_noise:
   value: null
   placeholder: SENSOR_NOISE
@@ -20,9 +20,9 @@ rel_unc_threshold:
   placeholder: REL_UNC_THRESHOLD
   source: null
 err_threshold_frac:
-  value: null
+  value: 0.1
   placeholder: ERR_THRESHOLD_FRAC
-  source: null
+  source: "Luke 2026-10-19: a range estimate more than 10 % wrong counts as a large error. A stated choice that can be changed; the full PR curves for 5, 10, 20 and 50 % are always reported (D-311)"
 nonlinear_ratio_tol:
   value: null
   placeholder: NONLINEAR_RATIO_TOL
@@ -38,3 +38,7 @@ err_threshold_sweep:
   value: [0.05, 0.1, 0.2, 0.5]
   placeholder: ERR_THRESHOLD_FRAC
   source: "Sweep design by Claude 2026-10-19 (Section 7.7: sweep, report the full PR curve, then fix one operating point on the calibration split). The single {{ERR_THRESHOLD_FRAC}} is chosen in scripts/midair_calibrate.py on the calibration split."
+flag_l2:
+  value: 0.01
+  placeholder: FLAG_L2
+  source: "Claude 2026-10-19, set before any fit: mild ridge penalty on standardised features, so a handful of coefficients stay stable; not tuned (D-404)"

@@ -49,3 +49,12 @@ def test_size_bin_restricts_ground_truth():
 def test_no_ground_truth_gives_nan():
     r = evaluate_detections({"img": np.zeros((0, 4))}, {"img": (GT, np.array([0.9, 0.8]))}, 0.5)
     assert np.isnan(r["ap"])
+
+
+def test_size_bin_with_an_image_that_has_no_ground_truth():
+    """Regression: an image with detections but no ground truth crashed the size-bin path."""
+    gt = {"a": GT, "b": np.zeros((0, 4))}
+    det = {"a": (GT.copy(), np.array([0.9, 0.8])), "b": (GT[:1], np.array([0.7]))}
+    r = evaluate_detections(gt, det, 0.5, height_range=(0, 15))
+    assert r["n_gt"] == 1
+    assert 0 < r["ap"] <= 1

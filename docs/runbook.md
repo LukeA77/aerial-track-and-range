@@ -20,6 +20,20 @@ Commands run from the repository root with the project virtual environment. On W
    python scripts/midair_calibrate.py --level mid --base oracle_plane --apply-test --final
    ```
 
+## Terrain-aware ranging (plans D, B, E; D-401 to D-404)
+
+1. Colour images for development and calibration (test only at the end):
+   `python scripts/download_midair.py --only Kite_training/sunny/color_left/<trajectory>`
+2. Tracking noise, development only: `python scripts/measure_tracking_noise.py`, then
+   `python scripts/midair_terrain.py --set-sigma-from-measurement`
+3. Terrain estimates: `python scripts/midair_terrain.py --split development` (then `calibration`)
+4. Compare flat and terrain on development: `python scripts/terrain_analyse.py --split development`
+5. Fit calibration (B) and the flag (E) on the calibration split: `python scripts/terrain_analyse.py --fit-calibration`
+6. Test split, once, after freezing: restore the test flights from Drive (`python scripts/archive_midair.py --restore --splits test`), download their colour images, then
+   `python scripts/midair_eval.py --split test --final`,
+   `python scripts/midair_terrain.py --split test --final`,
+   `python scripts/terrain_analyse.py --split test --final`
+
 ## VisDrone (Phase 3)
 
 1. Prepare the data: `make visdrone-prep` (the overlap check, then the MOT ground truth and the YOLO set with the leakage exclusion, D-308).

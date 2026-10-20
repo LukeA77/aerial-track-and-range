@@ -137,3 +137,55 @@ They span sub-degree to multi-degree attitude error. They are experimental desig
 **D-312 Detection size bins.** Box-height bins of 0–16, 16–32, 32–64, 64–128 and 128+ px. Each bin doubles the previous one; small objects dominate VisDrone, and Section 9.2 asks for AP by size. Detection AP on MOT frames uses every 10th frame of each sequence, because neighbouring frames are near-duplicates (`scripts/detect_eval.py`).
 
 **D-313 Edge tooling.** onnx 1.23.2 (Apache-2.0), onnxruntime 1.31.0 (MIT) and onnxslim 0.1.98 (MIT), pinned in `requirements-train-lock.txt`. `scripts/export_onnx.py` always reports the actual maximum box and score differences and the detection agreement on a seeded sample of MOT val frames. It compares against `{{PARITY_TOL}}` only once that value is set with a justification.
+
+## Luke's decisions, 2026-10-19
+
+**D-314** (each item below is Luke's decision):
+- (a) `{{ERR_THRESHOLD_FRAC}}` = 0.1. A range estimate more than 10 % wrong counts as a large error. This is a stated choice that can be changed, and the full curves for 5, 10, 20 and 50 % are always reported.
+- (b) Detector fine-tuning (B2) runs on a cloud GPU: free Kaggle first, paid if needed. Luke uploads the package himself as a private dataset (`docs/gpu_training.md`, `gpu/train_b2_kaggle.py`). The package is `cache/gpu_package/visdrone_yolo.zip`, with its SHA-256 recorded in `manifest.json`.
+- (c) The D-308 exclusion of 78 overlapping DET images is approved.
+- (d) `{{MOT17_REPO_PATH}}` is https://github.com/LukeA77/MOT_Tracking at commit 455e702. Its `outputs/metrics.json` is copied to `results/mot17_reference/metrics.json` with provenance, for the domain-gap comparison. The repository holds no weights, so B1 needs Luke's trained `.pt` file if he still has it.
+- (e) `Data/annotations/` and `Data/images/` were verified as byte-identical copies of DET test-dev (all 3,220 files), and Luke will delete them.
+- (f) The uncertainty-model problem (H3) is **not** to be reported as a dead end. Find a solution; options are under discussion.
+
+**D-315 Training schedule for B2 (`{{TRAIN_HYPERPARAMS}}`).** The library defaults (100 epochs, early-stopping patience 100) are changed to at most 50 epochs with patience 10, plus `cache="ram"`. Reasons:
+- Fine-tuning from pretrained weights converges well before 100 epochs.
+- Luke's GPU quota is 30 hours a week.
+- Early stopping on DET val is allowed by Section 4.5.
+- Luke's MOT17 run used 30 epochs.
+- RAM caching only removes JPEG-decoding stalls; it does not change what is learned.
+
+The first Kaggle attempt took about 1 hour per epoch, the same as the local CPU probe, which suggests the GPU was not active. The script now refuses to run without a GPU. Everything else stays at library defaults.
+
+## Terrain-aware ranging (Luke's plan D + E + B + C, 2026-10-19)
+
+This goes beyond build.md Section 6.3, at Luke's request (D-314 f). The flat-ground method stays as the baseline, so that "flat versus terrain-aware" is reported side by side.
+
+**D-401 Terrain from motion (D).**
+- Corners in frame k (Shi-Tomasi) are tracked to earlier frames k − g (pyramidal Lucas-Kanade, kept only if the forward-backward error is below 1 px).
+- Each track is triangulated with the two known camera poses (midpoint method, `geometry/triangulation.py`, test-first, matching the stereo depth-sigma oracle).
+- **Per-feature baseline choice.** Every corner is triangulated against each gap in (1, 2, 5, 10), and the estimate with the smallest total position variance (trace of the covariance) is kept. Exploration on development trajectory 0002 showed a single 5-frame gap loses near ground: fast image motion breaks tracking, the support radius grows to about 8 m, and steep views reach 8 % error, against 2 % with gaps of 1–2. Distant ground prefers longer gaps. Selecting by Down variance alone was rejected, because shallow rays hide their error along the nearly horizontal line of sight.
+- Each target ray is intersected with a robust local plane height field fitted to its k = 30 nearest triangulated points (`geometry/terrain.py`). The neighbourhood size adapts to point density instead of using a fixed radius.
+- The method uses only images and poses: no segmentation, depth or height above ground.
+- Detector and tracker settings are common OpenCV values, not tuned (`configs/geometry.yaml`, `terrain_motion`).
+
+**D-402 Tracking noise (`{{TERRAIN_SIGMA_PX}}`).** Measured on the development split (`scripts/measure_tracking_noise.py` → `results/midair/development/tracking_noise.json`). For each corner, the true 3D point (from radial depth, at locally smooth depth only) is projected into the earlier frame and compared with the tracked position. The robust sigma (mean of u and v, from 1.4826 × MAD) is used per gap. The tracker has a small core error with a heavy tail (90th-percentile errors are several times the core sigma). The core sigma drives the triangulation covariance; the tail is left to the conformal calibration (D-403), not hidden in a guessed number.
+
+**D-403 Calibrated intervals (B).** Split conformal prediction (Vovk, Gammerman and Shafer, 2005; Lei et al., 2018), in `evaluate/conformal.py`. The score is |error| / sigma. The multiplier for level p is the ceil((n + 1) p)-th smallest calibration score, globally and per viewing-angle band ("Mondrian" conformal, with a global fallback for small bands). It is fitted on the calibration split and applied once to the test split. **Caveat:** samples within a trajectory are correlated, so the exchangeability guarantee is weaker than for independent samples. Coverage is therefore verified empirically on the test split, never assumed. References to be verified before the brief.
+
+**D-404 Reliability flag (E).** L2-regularised logistic regression on a few interpretable per-estimate features (`evaluate/flag.py`), fitted on the calibration split only, with its coefficients reported. The L2 weight is a new placeholder (`{{FLAG_L2}}`), set before seeing test data.
+
+**C (car-size cross-check)** is not built yet. Mid-Air has no vehicles, so it can only be evaluated on real footage (AU-AIR, not yet available).
+
+**D-316 Detection cap (`max_det` = 1000).** The Kaggle training log reported VisDrone DET images with up to 902 objects (train) and 317 (val). The library default cap of 300 per image would cut recall in crowded frames, so every local inference (detection AP, tracking, pixel-noise fit) now uses 1000, set in `configs/detector.yaml`. B0 and B2 were re-scored with it, so they are compared under the same cap. B0 scores did not change: the zero-shot model never reached 300 detections.
+
+**D-405 Image-space support for the terrain fit.** The development run with world-space k-nearest support (15 trajectories) showed a large-error tail: about 13 % of valid land estimates more than 50 % off. Almost all were large underestimates (median estimate/truth about 0.12), with support radius about 1.6 times the estimated range against 0.2 for good estimates. The iteration had locked onto a near, steep patch that the ray meets too early. Alternatives were compared on development trajectories 0003, 0016 and 0029, using every 4th evaluated frame (`cache/logs/neighbours_compare*.log`):
+- **world** (k nearest in 3D around the ray): share of estimates more than 50 % off was 39 % / 3 % / 34 %, median 8.7 % / 1.2 % / 18 %.
+- **image** (the k triangulated features nearest the target pixel, i.e. the patch the camera sees around the target): 13 % / 4 % / 14 %, median 6.1 % / 1.5 % / 5.6 %.
+- **image then world** (image patch, then a world refinement): 9 % / 4 % / 19 %, median 4.7 % / 1.3 % / 11 %.
+
+Image support is the most consistent: no trajectory fails badly. It is now the setting (`neighbours: image`). The refinement sometimes returns to the wrong patch and is not used. The full development rerun with image support replaces the earlier world-support numbers.
+
+**D-317 Tiling with a full-frame pass (B3).** The first tile-only setting on MOT val (tile 480, overlap 0.2) raised small-object AP50 (vehicle 16–32 px: 0.345 against 0.266) but lowered overall AP50 (vehicle 0.477 against 0.587), because objects larger than a tile are split across tiles. `detect_tiled(..., include_full=True)` also detects the whole frame and merges it with the tiles through class-wise NMS, the usual remedy in sliced inference. It is tested with an object that no tile contains. Tile size and overlap are chosen on validation only, from the sweep in `cache/logs/overnight.log`.
+
+**D-318 Tile merging by intersection over smaller area.** Tiled tracking (B3) on val was worse than untiled tracking (IDF1 vehicle 0.425 against 0.586), with precision falling from 0.69 to 0.52 and identity switches doubling. The cause: fragments of an object cut at a tile edge overlap the full detection with low IoU, so plain NMS keeps them. `nms(..., ios_thr)` also suppresses a lower-scoring box when at least `ios_thr` of the smaller box lies inside the kept box (intersection over smaller area, the merge criterion used by sliced-inference tools such as SAHI). It is tested on a tile-edge fragment and on adjacent separate objects. The threshold is chosen on val from {0.5, 0.8} (new placeholder `{{TILE_IOS}}`).

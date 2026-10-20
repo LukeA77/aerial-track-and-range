@@ -80,7 +80,14 @@ def main(argv: list[str] | None = None) -> int:
         if all(
             (root / m / n / ".frames.done").exists() for m in ("depth", "segmentation", "normals")
         )
+        and not (root / "depth" / n / ".archived").exists()
     ]
+    archived = sorted(n for n in splits[args.split] if (root / "depth" / n / ".archived").exists())
+    if archived:
+        print(
+            f"{len(archived)} trajectories are on Google Drive; restore them first with "
+            f"scripts/archive_midair.py --restore --splits {args.split}: {archived}"
+        )
     missing = sorted(set(splits[args.split]) - set(names))
     print(f"{args.split}: {len(names)} trajectories available, {len(missing)} not yet downloaded")
 

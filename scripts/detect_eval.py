@@ -44,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--tiled", action="store_true")
     ap.add_argument("--tile", type=int, default=None)
     ap.add_argument("--overlap", type=float, default=None)
+    ap.add_argument("--include-full", action="store_true", help="also detect the full frame")
     args = ap.parse_args(argv)
     if args.split == "test-dev" and not args.final:
         print("test-dev runs once, after all settings are frozen (R5). Use --final.")
@@ -56,12 +57,15 @@ def main(argv: list[str] | None = None) -> int:
 
     det_cfg = load_config("detector")
     iou = det_cfg.require("iou_match")
+    max_det = det_cfg.require("max_det")
     cmap = {int(k): v for k, v in det_cfg.require("class_maps")[args.class_map].items()}
     groups = sorted(set(cmap.values()))
     model = YOLO(args.weights)
 
     def predict(img: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        r = model.predict(img, imgsz=args.imgsz, classes=sorted(cmap), verbose=False)[0]
+        r = model.predict(
+            img, imgsz=args.imgsz, classes=sorted(cmap), max_det=max_det, verbose=False
+        )[0]
         xyxy = r.boxes.xyxy.cpu().numpy()
         ltwh = np.column_stack([xyxy[:, :2], xyxy[:, 2:] - xyxy[:, :2]])
         return ltwh, r.boxes.conf.cpu().numpy(), r.boxes.cls.cpu().numpy().astype(int)
@@ -80,7 +84,12 @@ def main(argv: list[str] | None = None) -> int:
             t0 = time.perf_counter()
             if args.tiled:
                 b, s, c = detect_tiled(
-                    img, lambda im, x0, y0: predict(im), args.tile, args.overlap, nms_iou=iou
+                    img,
+                    lambda im, x0, y0: predict(im),
+                    args.tile,
+                    args.overlap,
+                    nms_iou=iou,
+                    include_full=args.include_full,
                 )
             else:
                 b, s, c = predict(img)
@@ -122,11 +131,13 @@ def main(argv: list[str] | None = None) -> int:
         "class_map": args.class_map,
         "imgsz": args.imgsz,
         "tiled": args.tiled,
+        "include_full": args.include_full,
         "tile": args.tile,
         "overlap": args.overlap,
         "frame_stride": args.frame_stride,
         "n_images": n_img,
         "iou_match": iou,
+        "max_det": max_det,
         "ultralytics": ultralytics.__version__,
         "seconds_per_image_wall": t_total / max(n_img, 1),
         "timing_note": "Wall time, not the Section 10.4 benchmark protocol.",

@@ -1,6 +1,6 @@
 {
- "generated_utc": "2026-10-19T16:54:05+00:00",
- "git_commit": "e26aab9",
+ "generated_utc": "2026-10-19T23:50:28+00:00",
+ "git_commit": "50aa1ea",
  "run": "B0_yolo26n_640_botsort_cmc",
  "split": "val",
  "weights": "yolo26n.pt",
@@ -8,6 +8,7 @@
  "tracker": "botsort_cmc.yaml",
  "class_map": "coco",
  "iou_match": 0.5,
+ "max_det": 1000,
  "ultralytics": "8.4.182",
  "sequences": [
   "uav0000086_00000_v",
@@ -20,7 +21,7 @@
  ],
  "timing_note": "Wall time of detector+tracker calls; not a latency benchmark (Section 10.4 protocol not applied).",
  "timing": {
-  "track_seconds": 491.31330830008665,
+  "track_seconds": 613.7801595998826,
   "frames": 2846
  },
  "metrics": {

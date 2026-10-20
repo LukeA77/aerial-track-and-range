@@ -67,7 +67,8 @@ def evaluate_detections(
         tp, match = match_image(g, boxes, scores, iou_thr)
         keep = np.ones(len(boxes), bool)
         if height_range:
-            matched_out = tp & ~in_bin[np.maximum(match, 0)]
+            # Images without ground truth have no matches (and an empty in_bin to index).
+            matched_out = tp & ~in_bin[np.maximum(match, 0)] if len(g) else np.zeros_like(tp)
             unmatched_out = ~tp & ~((boxes[:, 3] >= lo) & (boxes[:, 3] < hi))
             keep = ~(matched_out | unmatched_out)
         all_scores.append(scores[keep])

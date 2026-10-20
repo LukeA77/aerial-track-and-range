@@ -19,8 +19,9 @@ from pathlib import Path
 
 import numpy as np
 
+from aerialrange.detect.tiling import detect_tiled
 from aerialrange.track.evaluate import accumulate, read_ignored, read_rows, summarise
-from aerialrange.track.runner import run_sequence
+from aerialrange.track.runner import run_sequence, run_sequence_custom
 from aerialrange.utils.config import REPO_ROOT, load_config
 
 PREP = REPO_ROOT / "cache" / "visdrone" / "mot"
@@ -36,6 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--split", default="val", choices=["val", "test-dev"])
     ap.add_argument("--final", action="store_true")
     ap.add_argument("--sequences", type=int, default=None, help="limit (smoke tests only)")
+    ap.add_argument("--tiled", action="store_true", help="B3: tiled detection (D-317)")
+    ap.add_argument("--nms-ios", type=float, default=None, help="tile merge IoS threshold (D-318)")
     args = ap.parse_args(argv)
     if args.split == "test-dev" and not args.final:
         print("test-dev runs once, after all settings are frozen (R5). Use --final.")
@@ -55,7 +58,43 @@ def main(argv: list[str] | None = None) -> int:
     for seq in seqs:
         info = json.loads((seq / "seqinfo.json").read_text())
         frames = sorted((REPO_ROOT / info["frame_dir"]).glob("*.jpg"))
-        rows, t = run_sequence(model, frames, str(REPO_ROOT / args.tracker), args.imgsz, cmap)
+        if args.tiled:
+            # B3: tiled detection (configs/detector.yaml `tiling`, D-317) fed to the tracker.
+            tcfg = det.require("tiling")
+            max_det = det.require("max_det")
+
+            def predict(im: np.ndarray, max_det: int = max_det) -> tuple[np.ndarray, ...]:
+                r = model.predict(
+                    im, imgsz=args.imgsz, classes=sorted(cmap), max_det=max_det, verbose=False
+                )[0]
+                xyxy = r.boxes.xyxy.cpu().numpy()
+                return (
+                    np.column_stack([xyxy[:, :2], xyxy[:, 2:] - xyxy[:, :2]]),
+                    r.boxes.conf.cpu().numpy(),
+                    r.boxes.cls.cpu().numpy().astype(int),
+                )
+
+            def detect(img: np.ndarray, tcfg: dict = tcfg) -> tuple[np.ndarray, ...]:
+                return detect_tiled(
+                    img,
+                    lambda im, x0, y0: predict(im),
+                    tcfg["tile"],
+                    tcfg["overlap"],
+                    nms_iou=iou,
+                    include_full=tcfg["include_full"],
+                    nms_ios=args.nms_ios,
+                )
+
+            rows, t = run_sequence_custom(detect, frames, str(REPO_ROOT / args.tracker), cmap)
+        else:
+            rows, t = run_sequence(
+                model,
+                frames,
+                str(REPO_ROOT / args.tracker),
+                args.imgsz,
+                cmap,
+                max_det=det.require("max_det"),
+            )
         timing = {k: timing[k] + t[k] for k in timing}
         ign = read_ignored(seq / "ignored.txt")
         for g in groups:
@@ -85,8 +124,11 @@ def main(argv: list[str] | None = None) -> int:
         "weights": Path(args.weights).name,
         "imgsz": args.imgsz,
         "tracker": Path(args.tracker).name,
+        "tiled": args.tiled,
+        "nms_ios": args.nms_ios,
         "class_map": args.class_map,
         "iou_match": iou,
+        "max_det": det.require("max_det"),
         "ultralytics": ultralytics.__version__,
         "sequences": [s.name for s in seqs],
         "timing_note": "Wall time of detector+tracker calls; not a latency benchmark "
