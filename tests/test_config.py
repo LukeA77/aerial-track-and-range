@@ -56,8 +56,14 @@ def test_latency_budget_derived_from_fps():
 
 
 def test_latency_budget_refuses_unset_fps():
+    entry = {"value": None, "placeholder": "TARGET_FPS", "source": None}
+    unset = parse_config("edge", {"target_fps": entry})
     with pytest.raises(MissingParameterError):
-        latency_budget_ms(load_config("edge"))
+        latency_budget_ms(unset)
+
+
+def test_latency_budget_is_derived_from_target_fps():
+    assert latency_budget_ms(load_config("edge")) == pytest.approx(1000 / 30)
 
 
 def test_config_hash_changes_with_values():

@@ -1,0 +1,9 @@
+# AU-AIR settings (Phase 4, build.md Section 8).
+frame_interval_ms:
+  value: 200
+  placeholder: null
+  source: "Measured: consecutive frame indices are 200 ms apart in time.ms in all 12 files (results/auair/schema.json, D-501), i.e. 5 fps"
+clip_gap_ms:
+  value: 6000
+  placeholder: CLIP_GAP_MS
+  source: "Derived (D-502): BoT-SORT track_buffer (30 frames, library default, configs/trackers/botsort_cmc.yaml) x frame_interval_ms. A longer gap is one the tracker cannot bridge, so it starts a new clip"

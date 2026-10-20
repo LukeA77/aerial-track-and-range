@@ -22,12 +22,12 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 |---|---|
 | Phase 0–1: set-up and geometry | ✅ Done |
 | Phase 2: distance on Mid-Air | ~85 %. Everything built and run on practice and calibration data; the final test run is left |
-| Phase 3: tracking | ~80 %. All detectors scored and the tracker tuned; choosing between the two best detectors (needs your speed target), the error gallery and the final test run are left |
-| Phase 4: real footage (AU-AIR) | ~5 %. **Dataset found by you** and copied to the laptop; work starts next |
-| Phase 5: speed | ~20 %. Tools built |
+| Phase 3: tracking | ~80 %. All detectors scored and the tracker tuned; choosing between the two best detectors (decided by the Phase 5 speed test), the error gallery and the final test run are left |
+| Phase 4: real footage (AU-AIR) | ~15 %. Data loaded and checked, split into 48 clips, contact sheets made. **Big finding:** the camera's tilt isn't recorded and it changes within clips |
+| Phase 5: speed | ~20 %. Tools built; **target set: 30 fps** (stretch), with 10 fps also reported |
 | Phase 6: write-up and video | ❌ Not started |
 
-**Overall: a little over half way.** 296 automated tests pass.
+**Overall: a little over half way.** 303 automated tests pass.
 
 ---
 
@@ -88,7 +88,7 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 ## 4. Data and storage
 - **Mid-Air:** all 30 flights downloaded. The 9 **test** flights are on Google Drive (`G:\My Drive\aerial-track-and-range-data`), every file verified. The practice and calibration flights are on the laptop.
 - **VisDrone:** tracking train and test-dev, and DET test-dev, are on Drive. The rest is on the laptop.
-- **AU-AIR:** found by you. On Drive (`AU-AIR`) and copied to the laptop (`Data\AU-AIR`, 2.3 GB, 32,823 frames). Every image checked: all present and readable. **Licence:** you found CC BY 4.0, but the file itself says non-commercial (CC BY-NC). Please send me the link where CC BY 4.0 is stated (BLOCKED.md item 6). Either way, this project can use it with credit to the authors.
+- **AU-AIR:** found by you. On Drive (`AU-AIR`) and copied to the laptop (`Data\AU-AIR`, 2.3 GB, 32,823 frames). Every image checked: all present and readable. 5 frames per second; 8 recordings, 48 clips; heights 2.8–30.6 m. **Licence:** your link (a third-party index) says CC BY 4.0, but the authors' own file says non-commercial, so we follow the stricter one: credit the authors, non-commercial use, and no AU-AIR images in the repository (D-323).
 - **Trained models** (in `cache\train\`, never committed): `B2_yolo26n_640`, `B2_yolo26n_960`, `B2_yolo26s_640`, all scored.
 - Saved detections for tracker tuning: `cache\visdrone\dets\` (19 MB; can be deleted any time and rebuilt).
 - Laptop free space: about 23 GB (after the AU-AIR copy).
@@ -100,17 +100,17 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 **Done this session (20 Oct):** both new models scored, and the tracker tuned on validation (sections 3 and D-319 to D-321 in `docs/decisions.md`). AU-AIR copied in.
 
 **Claude, next session**
-1. **Phase 4 start (AU-AIR):** read the annotation format (units of altitude and angles from the paper, not guessed), group frames into clips, make contact sheets for your tilt labels, and run the detector on it.
-2. Phase 3 leftovers: error gallery (worst identity switches, most-missed small objects); refresh the box-noise fit for the chosen detector.
-3. Final Mid-Air test-split run, **once**: restore the test flights from Drive, download their colour images, run, and report. It needs settings frozen first.
-4. Phase 5 (speed): needs your frames-per-second target. That benchmark also picks between n 960 and s 640.
+1. **AU-AIR camera tilt:** bring you options for estimating it from the images (for example from the horizon and road geometry, or from how car sizes change across the image), then build the chosen one. This is now the heart of Phase 4.
+2. Phase 4 continued: run the detector and tracker on AU-AIR, find parked (stationary) cars for the repeatability test, and work out the camera's focal length.
+3. **Phase 5 (speed), aiming at 30 fps:** formal benchmark, ONNX export (fix the parity gap first), INT8, and the accuracy-against-speed chart. This also picks between n 960 and s 640.
+4. Phase 3 leftovers: error gallery; refresh the box-noise fit for the chosen detector.
+5. Final Mid-Air test-split run, **once**, after settings are frozen.
 
 **You**
 1. **Commit** (section 6).
-2. **Frames-per-second target.** This now blocks two things: the speed phase and the final detector choice.
-3. Later: tilt labels for AU-AIR clips (I'll prepare contact sheets; about 15–30 minutes of your time).
-4. Optional: retrain n 960 for longer on Kaggle (it hadn't finished improving); your MOT17 `.pt` file (baseline B1).
-5. Later: a writing sample, demo video limits, licence variant ("-only" or "-or-later").
+2. **Label the AU-AIR clips:** open the pictures in `cache\auair\contact_sheets\` and fill the last two columns of `docs\auair_clip_notes.md` (instructions at the top). 48 clips, about 20–30 minutes.
+3. Optional: retrain n 960 for longer on Kaggle (it hadn't finished improving); your MOT17 `.pt` file (baseline B1).
+4. Later: a writing sample, demo video limits, licence variant ("-only" or "-or-later").
 
 ---
 
@@ -120,7 +120,7 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 cd C:\Users\27622\Documents\Projects\aerial-track-and-range
 git status
 git add .
-git commit -m "phase-3: score new detectors and tune tracker on val; add AU-AIR"
+git commit -m "phase-3/4: tune tracker on val, set fps target, load and segment AU-AIR"
 ```
 
 Check that `git status` doesn't list `Data\`, `cache\`, `.venv\` or any `.pt` file. They're ignored automatically.
