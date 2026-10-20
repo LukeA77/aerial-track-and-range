@@ -124,3 +124,35 @@ Luke's decisions: D + E + B + C. A fixed bumpiness value (plan A) was rejected a
 - B3 tracking on val (BoT-SORT with camera-motion compensation, tiling D-317) is **worse** than B2 despite higher detection AP. IDF1 person 0.322 against 0.392, vehicle 0.425 against 0.586. Identity switches 1425 / 938 against 663 / 307. Precision 0.51 / 0.52 against 0.62 / 0.69; recall slightly higher. Tiling adds fragmentary and duplicate boxes at tile edges (class-wise IoU-NMS does not merge partial boxes), which the tracker turns into identity switches. Next: intersection-over-smaller merging (as in SAHI) and a confidence threshold tuned on val; until then B2 is the better tracking configuration.
 - **Bug found and fixed (tiled tracking):** BoT-SORT's camera-motion compensation reads `xyxy` from the detections, and the `DetSet` wrapper only had `xywh`. GMC therefore fell back to identity ("GMC failed" warnings in the logs), so every tiled tracking run so far had compensation off and was not comparable with B2. Fixed (`DetSet.xyxy`, regression test). The invalid results are kept, renamed `*__INVALID_gmc_off.json`. Within those runs, IoS merging (D-318) improved vehicle IDF1 from 0.425 to 0.499 (IoS 0.5) and 0.476 (IoS 0.8). B3 with IoS 0.5 is being rerun with GMC working.
 - B3 with GMC fixed and IoS 0.5 merging (val, BoT-SORT with compensation): IDF1 person 0.390 / vehicle 0.573 against B2 0.392 / 0.586, so about equal. Recall higher (0.522 / 0.694 against 0.490 / 0.633), precision lower (0.507 / 0.576 against 0.622 / 0.690), MOTA lower, wall time about 7 times longer (1.48 s against 0.21 s per frame). B2 stays the default tracking configuration; the extra low-confidence detections are a case for the val confidence-threshold grid (`{{TRACKER_GRID}}`).
+
+## 2026-10-20: new detectors scored; tracker grid (development, VisDrone val)
+
+- **Detection, new B2 models** (MOT val, every 10th frame, score floor 0.25 as for B0 to B3; `results/visdrone/val/detect_B2_yolo26n_960.json`, `detect_B2_yolo26s_640.json`):
+
+  | | B2 n 640 | **B2 n 960** | **B2 s 640** | B3 (n 640, tiled) |
+  |---|---|---|---|---|
+  | Person AP50 / AP50:95 | 0.412 / 0.149 | 0.511 / 0.204 | 0.507 / 0.201 | 0.427 / 0.157 |
+  | Vehicle AP50 / AP50:95 | 0.587 / 0.352 | 0.625 / 0.377 | 0.627 / 0.371 | 0.610 / 0.343 |
+  | Person 16-32 px AP50 | 0.040 | 0.089 | 0.090 | 0.073 |
+  | Vehicle 16-32 px AP50 | 0.266 | 0.333 | 0.330 | 0.376 |
+  | Wall time per image (rough) | 0.12 s | 0.13 s | 0.15 s | 1.64 s |
+
+  Both new models beat B2 n 640 and B3 on overall AP, and are close to each other. The wall times are not the Section 10.4 benchmark; 960 against 640 needs that benchmark before any speed claim. DET-val mAP50 (all 10 classes, training curves): n 640 0.308, n 960 0.415, s 640 0.399. **n 960 peaked at its last epoch (50), so it had not converged**; s 640 stopped early at epoch 49 (best 39).
+- Tracker grid set up (D-319): `track/detcache.py`, `scripts/cache_detections.py` and `scripts/track_grid.py`; `make_tracker` and `run_sequence_custom` accept overrides, with unknown keys refused. Tests: replay matches live detection, overrides take effect, and frames of the wrong size are refused. 296 tests pass; lint clean.
+- **Finding:** tiled tracking (B3) used a score floor of 0.25, whereas live tracking uses 0.1, so earlier B3 tracking was not like-for-like (D-319). The cached grid uses 0.1 for every detector.
+- Validation detections cached for n 640 (202 s), n 960 and s 640; B3 tiled cache running.
+- First grid attempt ran out of memory: 5 workers at about 1.0-1.35 GB each, beside the B3 cache job, on 15.4 GB of RAM, so the machine swapped and one worker failed. No results were lost (none had finished). Restarted with 3 workers.
+- **Tracker grid complete** (D-319 to D-321; `results/visdrone/val/grid_summary.json` and `.csv`, from `scripts/grid_summary.py`). Replay check: the B2 n 640 default point reproduces the live run exactly (IDF1 0.392 / 0.586, MOTA 0.180 / 0.341). BoT-SORT with compensation, mean IDF1 over person and vehicle, default → tuned:
+
+  | Detector | Default | Tuned (high / new) | Person IDF1 | Vehicle IDF1 | Person / vehicle IDSW |
+  |---|---|---|---|---|---|
+  | B2 n 640 | 0.489 | 0.540 (0.45 / 0.45) | 0.422 | 0.657 | 213 / 102 |
+  | **B2 n 960** | 0.559 | **0.620** (0.05 / 0.55) | **0.548** | 0.693 | 168 / 68 |
+  | **B2 s 640** | 0.551 | **0.613** (0.25 / 0.65) | 0.530 | **0.695** | 108 / 46 |
+  | B3 (n 640 tiled) | 0.462 | 0.539 (0.15 / 0.65) | 0.439 | 0.639 | 156 / 101 |
+
+  ByteTrack, tuned: 0.473 / 0.537 / 0.546 / 0.483, below BoT-SORT in every case. Tuning raises precision and cuts identity switches but lowers recall (n 960 person recall 0.623 → 0.517). n 960 against s 640 is a tie on accuracy; the latency benchmark decides (needs `{{TARGET_FPS}}`). Provisional default: n 960, BoT-SORT with compensation, 0.05 / 0.55 (`configs/tracker.yaml`).
+- Grid edges: the s 640 optimum is interior after the extension; for n 960 the 0.05 edge is below the 0.1 floor, where all values are equivalent. B3 is not extended (0.08 behind, 7-13 times slower).
+- **AU-AIR (Phase 4 data) found by Luke**: copied to `Data/AU-AIR` (32,824 files, 2.283 GB, 0 failed), `configs/data.yaml` set. Licence CC BY 4.0 (Luke). Annotations: 32,823 frames at 1920 × 1080, 8 classes, per-frame GPS, altitude and attitude.
+- AU-AIR verified (every image decoded): 32,823 frames, all 1920 × 1080; 0 missing, extra, duplicated or unreadable; every frame has boxes. Boxes per class: Car 102,619; Van 9,995; Truck 9,545; Human 5,158; Trailer 2,538; Bicycle 1,128; Bus 729; Motorbike 319. People are scarce, so AU-AIR person results will rest on few objects. **Licence conflict** (BLOCKED.md item 6): Luke reports CC BY 4.0; the file's `licenses` field lists CC BY-NC-SA 2.0 and CC BY-NC 2.0.
+- Checks: 296 tests pass; lint clean.

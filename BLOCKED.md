@@ -1,20 +1,24 @@
 # Items that need Luke
 
-Last updated: 2026-10-19.
+Last updated: 2026-10-20.
 
 ## Decisions needed now
 
-1. **Uncertainty on rough terrain (H3).** Luke wants a solution, not a "cannot". Options are being brainstormed with Luke.
-2. **GPU training run.** Luke uploads `cache/gpu_package/visdrone_yolo.zip` to Kaggle (private) and runs `gpu/train_b2_kaggle.py`, following `docs/gpu_training.md`.
+1. **`{{TARGET_FPS}}` (frames-per-second target).** Now blocks the Phase 5 benchmark **and** the choice between the two tied detectors, B2 n 960 and s 640 (D-321).
+2. **AU-AIR licence wording** (item 6 below).
 3. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
+4. **Optional:** retrain B2 n 960 for more epochs on Kaggle; it peaked at its last epoch (50).
+
+Resolved 2026-10-19 to 20: uncertainty on rough terrain (plans D, E and B built, D-401 to D-404); GPU training (three B2 models trained on Kaggle).
 
 Resolved 2026-10-19 (D-314): large-error threshold 10 %; overlap exclusion approved; MOT17 repository linked; duplicate folders confirmed safe to delete.
 
 ## Data (Section 4)
 
 5. **Mid-Air: downloading** (`scripts/download_midair.py`, started 2026-10-18 at your request). Kite_training/sunny without colour images, about 2.8 GB per trajectory. 39 archives failed during an internet outage on 2026-10-19 and will be retried when the current pass ends. It stops if free disk space falls below 10 GB, and it resumes if rerun. Progress is in `Data/midair/download_log.txt`. Delete `Data/midair/Kite_training/` when we are done with it.
-6. **AU-AIR: not downloaded** (the dataset site's links are broken). Needed from Phase 4 only. When you have it, set `auair_subdir` in `configs/data.yaml`.
-7. **Stray files.** `Data/annotations/` and `Data/images/` (1,610 files each) duplicate VisDrone DET test-dev and are unused. Delete them if you agree; I have not touched them.
+6. **AU-AIR: resolved (2026-10-20).** Found by Luke, extracted to `G:\My Drive\aerial-track-and-range-data\AU-AIR`, copied by Claude to `Data/AU-AIR` (32,824 files, 0 failed) and set in `configs/data.yaml`. Verified: 32,823 annotated frames, all present and readable at 1920 × 1080, none missing, extra or duplicated.
+   **Licence conflict, needs Luke:** Luke reports CC BY 4.0, but the `licenses` field inside `annotations.json` lists CC BY-NC-SA 2.0 and CC BY-NC 2.0 (non-commercial). That field may be boilerplate carried over from the COCO format. Please send the link or page where CC BY 4.0 is stated, so the brief cites the right terms. Either way this non-commercial portfolio project can use the data with attribution to Bozcan and Kayacan (2020); the difference matters only for commercial reuse and for how the repository's data notice is worded.
+7. **Stray files.** `Data/annotations/` and `Data/images/` (1,610 files each) duplicate VisDrone DET test-dev and are unused. Luke confirmed on 2026-10-19 (D-314) that they are safe to delete; Luke deletes them, or tells Claude to.
 8. **Confirm the data root.** I use `Data/` inside this repository, which is git-ignored. Tell me if you want a different location.
 9. **Mid-Air second climate (optional, Section 7.1).** A few trajectories of one PLE climate would give the one-line climate-invariance check. Not downloaded, to save disk space.
 

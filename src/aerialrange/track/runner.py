@@ -81,12 +81,17 @@ class DetSet:
         return DetSet(self.xywh[m], self.conf[m], self.cls[m])
 
 
-def make_tracker(tracker_cfg: str) -> Any:
-    """A library tracker (ByteTrack, BoT-SORT, ...) built from a tracker YAML."""
+def make_tracker(tracker_cfg: str, overrides: Mapping[str, Any] | None = None) -> Any:
+    """A library tracker (ByteTrack, BoT-SORT, ...) built from a tracker YAML. `overrides`
+    replace YAML values (the validation grid, `{{TRACKER_GRID}}`); unknown keys are refused."""
     from ultralytics.trackers.track import TRACKER_MAP
     from ultralytics.utils import YAML, IterableSimpleNamespace
 
-    cfg = IterableSimpleNamespace(**YAML.load(tracker_cfg))
+    raw = YAML.load(tracker_cfg)
+    unknown = set(overrides or {}) - set(raw)
+    if unknown:
+        raise KeyError(f"tracker overrides not in {tracker_cfg}: {sorted(unknown)}")
+    cfg = IterableSimpleNamespace(**{**raw, **(overrides or {})})
     return TRACKER_MAP[cfg.tracker_type](args=cfg)
 
 
@@ -95,16 +100,18 @@ def run_sequence_custom(
     frames: Sequence[Path | np.ndarray],
     tracker_cfg: str,
     class_to_group: Mapping[int, str],
+    overrides: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, np.ndarray], dict[str, float]]:
     """Track one sequence with any detection function (for example tiled detection, B3).
 
     `detect(image)` returns (ltwh boxes, scores, class ids). Frames are image paths or arrays.
     Same output as `run_sequence`: rows per group (frame, id, left, top, width, height, score),
-    1-based frames, and timing totals (detection plus tracking).
+    1-based frames, and timing totals (detection plus tracking). `overrides` as in
+    `make_tracker`.
     """
     import cv2
 
-    tracker = make_tracker(tracker_cfg)
+    tracker = make_tracker(tracker_cfg, overrides)
     rows: dict[str, list] = {g: [] for g in set(class_to_group.values())}
     t_total = 0.0
     for k, f in enumerate(frames, start=1):

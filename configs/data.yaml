@@ -17,9 +17,9 @@ midair_subdir:
   placeholder: DATA_ROOT
   source: "Folder found in data_root on 2026-10-18"
 auair_subdir:
-  value: null
+  value: AU-AIR
   placeholder: DATA_ROOT
-  source: null
+  source: "Found by Luke 2026-10-20 (extracted to Google Drive); copied to <data_root>/AU-AIR by Claude 2026-10-20 (robocopy, 32,824 files, 2.283 GB, 0 failed: cache/logs/auair_copy.log)"
 mot17_repo_path:
   value: "https://github.com/LukeA77/MOT_Tracking@455e7025be7fce26d4d5839b894a11f663f09129"
   placeholder: MOT17_REPO_PATH
