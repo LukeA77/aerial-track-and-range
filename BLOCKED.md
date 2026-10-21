@@ -4,8 +4,7 @@ Last updated: 2026-10-20.
 
 ## Decisions needed now
 
-1. **AU-AIR tilt labels.** Open the 48 contact sheets in `cache/auair/contact_sheets/` and fill the View and Curvature columns of `docs/auair_clip_notes.md` (instructions at the top of that file). Expect `mixed` often: the camera tilt changes within clips (D-503).
-2. **AU-AIR camera tilt (decision coming).** AU-AIR does not record the camera tilt; Claude will bring options for estimating it from the images.
+1. Nothing urgent. Resolved 2026-10-20: AU-AIR clip labels (D-504) and the camera-tilt approach (D-505).
 3. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
 4. **Optional:** retrain B2 n 960 for more epochs on Kaggle; it peaked at its last epoch (50).
 

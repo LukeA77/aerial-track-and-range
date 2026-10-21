@@ -81,7 +81,8 @@ def main() -> int:
         "",
         "**For Luke:** open each sheet and fill the last two columns. **View**: `down` "
         "(camera looks straight down), `oblique` (camera looks forward at an angle; give a "
-        "rough angle below the horizon if you can, for example `oblique ~45`), or `mixed` "
+        "rough angle below the horizon if you can: 0 = looking at the horizon, "
+        "90 = straight down, so `oblique ~45` is halfway), or `mixed` "
         "(the view changes within the clip). **Curvature**: `yes` if straight lines (road "
         "edges, markings) bend near the image edges, otherwise `no`.",
         "",
