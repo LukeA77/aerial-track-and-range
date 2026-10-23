@@ -1,4 +1,4 @@
-# Session summary (updated 20 October 2026)
+# Session summary (updated 23 October 2026)
 
 Plain-English status. All numbers are **development numbers**, from practice and validation data used while building. The real, reportable results come from the held-back test data, run **once** at the end.
 
@@ -21,13 +21,13 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 | Part | Status |
 |---|---|
 | Phase 0–1: set-up and geometry | ✅ Done |
-| Phase 2: distance on Mid-Air | ~85 %. Everything built and run on practice and calibration data; the final test run is left |
-| Phase 3: tracking | ~80 %. All detectors scored and the tracker tuned; choosing between the two best detectors (decided by the Phase 5 speed test), the error gallery and the final test run are left |
-| Phase 4: real footage (AU-AIR) | ~20 %. Data loaded, checked and split into 48 clips; **your labels done**; plan agreed (straight-down clips first, then tilt from motion); first look at the focal length |
-| Phase 5: speed | ~20 %. Tools built; **target set: 30 fps** (stretch), with 10 fps also reported |
-| Phase 6: write-up and video | ❌ Not started |
+| Phase 2: distance on Mid-Air | ✅ **Done.** Final test result in (section 3) |
+| Phase 3: tracking | ✅ **Done.** Final test result in (section 3) |
+| Phase 4: real footage (AU-AIR) | ✅ **Done.** Held-out result and speed plausibility in |
+| Phase 5: speed | ✅ **Done.** 30 fps throughput reached (section 3) |
+| Phase 6: write-up and video | ~50 %. `aerialrange run` and `demo` built; README, limitations, cards, FAQ, cover note and brief (in your voice) drafted; waiting for your review; video not started (25 MB, 90 s) |
 
-**Overall: a little over half way.** 303 automated tests pass.
+**Overall: Phases 0-5 done; Phase 6 under way** (end-to-end pipeline, documents drafted). 358 automated tests pass.
 
 ---
 
@@ -50,7 +50,44 @@ A drone camera spots people and cars, follows them, works out **how far away eac
   | **After** | **65 %** | **87 %** | **93 %** | **98 %** |
 - **Warning light (plan E):** AUROC **0.77**, against about 0.60 for the old method. Bumpy local ground is its strongest clue.
 
-### Tracking on VisDrone (validation videos)
+### Distance: FINAL Mid-Air test result (9 held-back flights, run once)
+
+| Method | Valid | Median distance error |
+|---|---|---|
+| Flat ground + true height (unrealistic best case) | 81 % | 14.9 % |
+| Flat ground + altimeter (realistic) | 56 % | 315 % |
+| **Terrain from motion (your plan D)** | **91 %** | **3.1 %** |
+
+- Honest error bars: promised 90 % → delivered **84 %** after calibration (74 % before). Better, but still about 5 points short; stated plainly.
+- Warning flag AUROC 0.68 on test (0.77 in development).
+- One test flight broke the altimeter method entirely (0 % valid); terrain from motion still worked on 81 % of it.
+
+### Speed: 30 fps reached (throughput)
+
+| Setup | Frames per second | Delay per frame (median) | Tracking accuracy (IDF1, val) |
+|---|---|---|---|
+| Most accurate (960, one thread) | 9.6 | 103 ms | 0.617 |
+| **640 input, overlapped, detect every 2nd frame** | **33.4** | 47 ms | 0.536 |
+| 640 input, overlapped, detect every 3rd frame | 42.6 | 37 ms | 0.513 |
+
+- It keeps up with a 30 fps camera; each frame's result arrives about 1.5 frames late. INT8 was slower on this AMD laptop and was dropped. Chart: `results/edge/figures/pareto.png`.
+
+### Tracking: FINAL test result (VisDrone test-dev, run once)
+
+| | People | Vehicles |
+|---|---|---|
+| Tracking IDF1 | **0.436** | **0.760** |
+| MOTA | 0.264 | 0.635 |
+| Detection AP50 | 0.418 | 0.778 |
+
+Chosen setup: YOLO26n trained at 960, BoT-SORT with camera-motion compensation, tuned on validation. These are reportable numbers.
+
+### Real footage: AU-AIR (held-out flights, run once)
+- Camera worked out from the data: focal length 1,259 px (about 75° view), digitally stabilised, altimeter drifts by metres during a flight.
+- **Parked cars' computed positions stay within about 7.6 % of their distance** (6.4 % while hovering) over 343 held-out stretches. Looking steeply down it's about 2 %; near the horizon about 11 %. That matches the calibration flights, so the camera model holds on unseen flights.
+- AU-AIR's own annotations turned out loose (boxes 11-15 % too big) and inconsistent from frame to frame; both are recorded as dataset findings.
+
+### Tracking on VisDrone (validation videos, development)
 
 **Detection** (how well each model finds objects, AP50):
 
@@ -82,11 +119,12 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 - A crash on frames with too few ground points; an analysis-stage crash; a wrong selection rule in the terrain method; the Drive-move resume bug; camera-motion compensation silently off in tiled tracking. All were fixed with tests, and invalid results are kept and labelled.
 - (20 Oct) Tiled tracking had been given fewer low-confidence boxes than normal tracking, so the earlier comparison was unequal. All setups now get the same boxes.
 - (20 Oct) Running 5 tuning jobs at once ran the laptop out of memory (15 GB). Now 3 at a time; nothing was lost.
+- (21 Oct) The speed benchmark slowed the code it timed (memory tracing); the ONNX mismatch was an input-shape difference (now identical); reading data back from Google Drive was far too slow, so the test flights now download from the Mid-Air site; one test flight broke the altimeter method entirely (0 % valid), which crashed a summary (fixed, and kept as a finding).
 
 ---
 
 ## 4. Data and storage
-- **Mid-Air:** all 30 flights downloaded. The 9 **test** flights are on Google Drive (`G:\My Drive\aerial-track-and-range-data`), every file verified. The practice and calibration flights are on the laptop.
+- **Mid-Air:** the 9 **test** flights and 4 practice flights (0018, 0021, 0023, 0025; 0026 part-moved) are on Google Drive (`G:\My Drive\aerial-track-and-range-data`), every file verified. For the final run, test flights download from the Mid-Air site in batches and are released afterwards.
 - **VisDrone:** tracking train and test-dev, and DET test-dev, are on Drive. The rest is on the laptop.
 - **AU-AIR:** found by you. On Drive (`AU-AIR`) and copied to the laptop (`Data\AU-AIR`, 2.3 GB, 32,823 frames). Every image checked: all present and readable. 5 frames per second; 8 recordings, 48 clips; heights 2.8–30.6 m. **Licence:** your link (a third-party index) says CC BY 4.0, but the authors' own file says non-commercial, so we follow the stricter one: credit the authors, non-commercial use, and no AU-AIR images in the repository (D-323).
 - **Trained models** (in `cache\train\`, never committed): `B2_yolo26n_640`, `B2_yolo26n_960`, `B2_yolo26s_640`, all scored.
@@ -97,14 +135,9 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 
 ## 5. What's next
 
-**Done this session (20 Oct):** both new models scored, and the tracker tuned on validation (sections 3 and D-319 to D-321 in `docs/decisions.md`). AU-AIR copied in.
+**Claude, next:** the demo video (needs your size and length limits), the brief in your voice (needs your writing sample), verifying the references, and the release checklist (build.md Section 16).
 
-**Claude, next session**
-1. **AU-AIR focal length** (straight-down clips): find a published car-length distribution and the Bebop 2 camera specification, then fit properly. A first look suggests about 1,400 pixels.
-2. Phase 4 continued: run the detector and tracker on AU-AIR, find parked cars for the repeatability test, then build tilt-from-motion for the oblique clips (it must read about 90° on the straight-down clips).
-3. **Phase 5 (speed), aiming at 30 fps:** formal benchmark, ONNX export (fix the parity gap first), INT8, and the accuracy-against-speed chart. This also picks between n 960 and s 640.
-4. Phase 3 leftovers: error gallery; refresh the box-noise fit for the chosen detector.
-5. Final Mid-Air test-split run, **once**, after settings are frozen.
+**You:** review the drafted documents; send a writing sample, the video limits and the licence variant (BLOCKED.md).
 
 **You**
 1. **Commit** (section 6).
@@ -119,7 +152,7 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 cd C:\Users\27622\Documents\Projects\aerial-track-and-range
 git status
 git add .
-git commit -m "phase-4: clip labels, camera-tilt plan, first scale look"
+git commit -m "phase-2/3/4/5: final Mid-Air and VisDrone tests, AU-AIR held-out result, 30 fps pipeline"
 ```
 
 Check that `git status` doesn't list `Data\`, `cache\`, `.venv\` or any `.pt` file. They're ignored automatically.
