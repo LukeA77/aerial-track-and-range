@@ -62,3 +62,9 @@ class Replay:
         self.k += 1
         m = s >= self.min_conf
         return b[m], s[m], c[m]
+
+    def skip(self) -> None:
+        """Pass over the next frame without returning its detections (detection stride)."""
+        if self.k >= len(self.dets):
+            raise IndexError("more frames than cached detections")
+        self.k += 1

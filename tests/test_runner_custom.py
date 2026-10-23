@@ -43,3 +43,26 @@ def test_detset_exposes_corner_boxes_for_camera_motion_compensation():
     d = DetSet(np.array([[50.0, 40.0, 20.0, 10.0]]), np.array([0.9]), np.array([3.0]))
     np.testing.assert_allclose(d.xyxy, [[40.0, 35.0, 60.0, 45.0]])
     assert d[np.array([True])].xyxy.shape == (1, 4)
+
+
+@pytest.mark.parametrize("cfg", ["bytetrack.yaml", "botsort_cmc.yaml"])
+def test_detection_stride_outputs_predicted_boxes_on_skipped_frames(cfg):
+    frames = [np.full((240, 320, 3), 90, np.uint8) for _ in range(16)]
+    calls = []
+
+    def detect(img):
+        k = len(calls)
+        calls.append(k)
+        return (np.array([[40.0 + 6 * k * 2, 100, 20, 30]]), np.array([0.9]), np.array([3]))
+
+    rows, _ = run_sequence_custom(
+        detect, frames, str(REPO_ROOT / "configs" / "trackers" / cfg), {3: "vehicle"}, det_stride=2
+    )
+    v = rows["vehicle"]
+    assert len(calls) == 8  # detector ran on every 2nd frame only
+    assert len(np.unique(v[:, 1])) == 1  # one identity throughout
+    later = v[v[:, 0] >= 6]
+    assert set(later[:, 0].astype(int)) == set(range(6, 17))  # a box on every frame, skipped too
+    # predicted boxes on skipped frames sit between their detected neighbours
+    x = dict(zip(later[:, 0].astype(int), later[:, 2], strict=True))
+    assert x[8] < x[10] < x[12]

@@ -3,14 +3,16 @@
 A pipeline is a list of (name, callable) stages; each stage's output is the next stage's
 input. Protocol sizes are `{{N_WARMUP}}`, `{{N_TIMED_FRAMES}}`, `{{N_REPEATS}}` from
 configs/edge.yaml. Reports median, 95th and 99th percentiles per stage and end to end,
-throughput, and peak Python-traced memory. Overlay drawing is not a stage here (excluded from
-the budget, Section 10.1).
+throughput, and the process's peak resident memory. Memory is read from the operating system
+after timing, not traced during it: Python's allocation tracer slows every allocation and
+would inflate the timings of Python-heavy stages such as tracking. Overlay drawing is not a
+stage here (excluded from the budget, Section 10.1).
 """
 
 from __future__ import annotations
 
+import sys
 import time
-import tracemalloc
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from itertools import cycle, islice
@@ -42,6 +44,19 @@ def _stats(ms: np.ndarray) -> dict[str, float]:
     }
 
 
+def peak_rss_mb() -> float:
+    """Peak resident memory of this process so far, in MiB (peak working set on Windows)."""
+    import psutil
+
+    info = psutil.Process().memory_info()
+    if hasattr(info, "peak_wset"):
+        return info.peak_wset / 2**20
+    import resource
+
+    scale = 1 if sys.platform == "darwin" else 1024  # ru_maxrss: bytes on macOS, KiB on Linux
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * scale / 2**20
+
+
 def run_benchmark(
     stages: Sequence[Stage], inputs: Sequence[Any], protocol: BenchmarkProtocol
 ) -> dict[str, Any]:
@@ -58,13 +73,11 @@ def run_benchmark(
 
     for x in islice(cycle(inputs), protocol.n_warmup):
         one(x)
-    tracemalloc.start()
-    rows = []
+    rows, repeat_medians = [], []
     for _ in range(protocol.n_repeats):
-        for x in islice(cycle(inputs), protocol.n_timed):
-            rows.append(one(x))
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+        block = [one(x) for x in islice(cycle(inputs), protocol.n_timed)]
+        repeat_medians.append(float(np.median(np.sum(block, axis=1))))
+        rows += block
     t = np.array(rows)
     out = {n: _stats(t[:, i]) for i, n in enumerate(names)}
     out["end_to_end"] = _stats(t.sum(axis=1))
@@ -72,7 +85,8 @@ def run_benchmark(
         "stages": out,
         "n_samples": len(rows),
         "throughput_fps": 1000.0 / out["end_to_end"]["mean_ms"],
-        "peak_traced_mb": peak / 2**20,
+        "end_to_end_median_by_repeat_ms": repeat_medians,
+        "peak_rss_mb": peak_rss_mb(),
         "protocol": protocol.__dict__,
     }
 
@@ -87,4 +101,35 @@ def budget_verdict(stages: dict[str, dict[str, float]], budget_ms: float | None)
         "budget_ms": budget_ms,
         "meets_at_median": e["median_ms"] <= budget_ms,
         "meets_at_p99": e["p99_ms"] <= budget_ms,
+    }
+
+
+def background_cpu(seconds: float = 3.0) -> dict[str, Any]:
+    """CPU use of all other processes over `seconds`, measured just before timing, so each
+    result records how quiet the machine actually was (in % of one core; the machine total is
+    100 x logical cores). The five busiest are named."""
+    import os
+
+    import psutil
+
+    me = os.getpid()
+    procs = [p for p in psutil.process_iter(["name"]) if p.pid != me]
+    for p in procs:
+        try:
+            p.cpu_percent(None)
+        except psutil.Error:
+            pass
+    time.sleep(seconds)
+    use = []
+    for p in procs:
+        try:
+            use.append((p.info["name"] or "?", p.cpu_percent(None)))
+        except psutil.Error:
+            pass
+    use = [u for u in use if u[0] not in ("System Idle Process", "Idle")]
+    use.sort(key=lambda u: -u[1])
+    return {
+        "other_processes_cpu_percent_of_one_core": round(sum(u for _, u in use), 1),
+        "busiest": [{"name": n, "cpu_percent": round(c, 1)} for n, c in use[:5]],
+        "window_s": seconds,
     }

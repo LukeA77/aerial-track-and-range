@@ -28,6 +28,22 @@ CACHE = REPO_ROOT / "cache" / "midair"
 def summarise(r: dict[str, np.ndarray], mode: str) -> dict[str, float]:
     """Point summaries of one mode's errors over valid samples (Section 7.7)."""
     ok = r[f"{mode}.valid"]
+    if not ok.any():
+        # A mode can be invalid for a whole trajectory (e.g. relative altitude when the drone
+        # flies below its take-off height); report it rather than fail (D-607).
+        keys = (
+            "signed_range_err_median_m",
+            "abs_range_err_median_m",
+            "abs_range_err_mean_m",
+            "range_rmse_m",
+            "abs_range_err_p90_m",
+            "abs_range_err_p95_m",
+            "rel_range_err_median",
+            "rel_range_err_p90",
+            "horiz_err_median_m",
+            "horiz_err_p95_m",
+        )
+        return {"n_samples": int(len(ok)), "valid_fraction": 0.0, **{k: float("nan") for k in keys}}
     e = r[f"{mode}.range_err_m"][ok]
     rel = np.abs(r[f"{mode}.rel_range_err"][ok])
     hz = r[f"{mode}.horiz_err_m"][ok]
@@ -52,6 +68,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--split", required=True, choices=["development", "calibration", "test"])
     ap.add_argument("--final", action="store_true", help="required for the test split")
+    ap.add_argument(
+        "--from-cache",
+        action="store_true",
+        help="summarise every trajectory of the split from cache/midair/<name>.npz without "
+        "reading images (after batch processing; fails if any trajectory is missing)",
+    )
     args = ap.parse_args(argv)
     if args.split == "test" and not args.final:
         print("The test split runs once, after all settings are frozen (R5). Use --final.")
@@ -74,14 +96,24 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     splits = json.loads((REPO_ROOT / "results" / "splits.json").read_text())["midair"]["splits"]
-    names = [
-        n
-        for n in splits[args.split]
-        if all(
-            (root / m / n / ".frames.done").exists() for m in ("depth", "segmentation", "normals")
-        )
-        and not (root / "depth" / n / ".archived").exists()
-    ]
+    if args.from_cache:
+        absent = [n for n in splits[args.split] if not (CACHE / f"{n}.npz").exists()]
+        if absent:
+            print(f"--from-cache: no evaluation cache for {absent}")
+            return 1
+    names = (
+        list(splits[args.split])
+        if args.from_cache
+        else [
+            n
+            for n in splits[args.split]
+            if all(
+                (root / m / n / ".frames.done").exists()
+                for m in ("depth", "segmentation", "normals")
+            )
+            and not (root / "depth" / n / ".archived").exists()
+        ]
+    )
     archived = sorted(n for n in splits[args.split] if (root / "depth" / n / ".archived").exists())
     if archived:
         print(
@@ -95,8 +127,12 @@ def main(argv: list[str] | None = None) -> int:
     per_traj, all_r = {}, []
     for name in names:
         print(f"  {name} ...", flush=True)
-        r = evaluate_trajectory(root, name, s, seed)
-        np.savez_compressed(CACHE / f"{name}.npz", **r)
+        if args.from_cache:
+            with np.load(CACHE / f"{name}.npz") as z:
+                r = {k: z[k] for k in z.files}
+        else:
+            r = evaluate_trajectory(root, name, s, seed)
+            np.savez_compressed(CACHE / f"{name}.npz", **r)
         per_traj[name] = {m: summarise(r, m) for m in MODES}
         all_r.append(r)
     pooled = {k: np.concatenate([r[k] for r in all_r]) for k in all_r[0]} if all_r else {}

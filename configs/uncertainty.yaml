@@ -1,8 +1,8 @@
 # Uncertainty model (Section 6.3).
 sigma_pix_model:
-  value: {"person": {"kappa_u": 0.1093, "kappa_v": 0.086}, "vehicle": {"kappa_u": 0.0392, "kappa_v": 0.052}}
+  value: {"person": {"kappa_u": 0.1075, "kappa_v": 0.0790}, "vehicle": {"kappa_u": 0.0385, "kappa_v": 0.0532}}
   placeholder: SIGMA_PIX_MODEL
-  source: "Measured 2026-10-20: results/visdrone/val/pixel_noise.json, B2 detector (YOLO26n 640) against MOT-val ground truth, IoU >= 0.5, bottom-centre contact point, robust sigma of error / box size (Section 6.3)"
+  source: "Measured 2026-10-21: results/visdrone/val/pixel_noise_B2_yolo26n_960.json, chosen detector B2 YOLO26n 960 (D-605) against MOT-val ground truth, IoU >= 0.5, bottom-centre contact point, robust sigma of error / box size (Section 6.3). Updated after the Phase 2 test run (D-603), which does not read it; the n 640 values were 0.1093 / 0.086 and 0.0392 / 0.052"
 sensor_noise:
   value: null
   placeholder: SENSOR_NOISE

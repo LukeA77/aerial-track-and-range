@@ -179,3 +179,30 @@ def test_zero_speed_reports_isotropic_speed_sigma():
 def test_velocity_property():
     kf = GroundKalman(x=np.array([1.0, 2.0, 3.0, 4.0]), P=np.eye(4), q=Q)
     np.testing.assert_array_equal(kf.velocity, [3.0, 4.0])
+
+
+def test_batch_filter_matches_the_scalar_filter_exactly():
+    from aerialrange.geometry.kalman import GroundKalman, GroundKalmanBatch
+
+    rng = np.random.default_rng(3)
+    n = 7
+    z1, z2 = rng.normal(0, 5, (n, 2)), rng.normal(0, 5, (n, 2))
+    R = np.stack([np.diag(rng.uniform(0.1, 2.0, 2)) for _ in range(n)])
+    single = [GroundKalman.from_two_points(z1[i], R[i], z2[i], R[i], 0.2, 7.0) for i in range(n)]
+    batch = GroundKalmanBatch.from_two_points(z1, R, z2, R, 0.2, 7.0)
+    for step in range(6):
+        dt = 0.2 * (1 + step % 2)
+        z = rng.normal(0, 5, (n, 2))
+        have = rng.random(n) > 0.3  # some objects unmeasured this frame: predict only
+        for i, kf in enumerate(single):
+            kf.predict(dt)
+            if have[i]:
+                kf.update(z[i], R[i])
+        batch.predict(dt)
+        batch.update(z, R, have)
+        np.testing.assert_allclose(batch.x, [kf.x for kf in single], rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(batch.P, [kf.P for kf in single], rtol=1e-12, atol=1e-12)
+    sp, sp_sig = batch.speed()
+    for i, kf in enumerate(single):
+        s, s_sig, _, _ = kf.speed_heading()
+        assert sp[i] == pytest.approx(s) and sp_sig[i] == pytest.approx(s_sig)

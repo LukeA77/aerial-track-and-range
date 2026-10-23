@@ -1,0 +1,30 @@
+**DRAFT.** No data is redistributed in this repository. Counts and checksums come from `results/data_check.json` and `results/data_manifest.json`.
+
+# Data cards
+
+## VisDrone2019 (tracking and detection)
+
+- **Source:** https://github.com/VisDrone/VisDrone-Dataset. Collected by the AISKYEYE team, Lab of Machine Learning and Data Mining, Tianjin University.
+- **Citation:** Zhu, P., Wen, L., Du, D., Bian, X., Fan, H., Hu, Q. and Ling, H. (2021) 'Detection and tracking meet drones challenge', *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 44(11), pp. 7380-7399. To verify against the journal before publication.
+- **Licence and terms (checked 2026-10-19):** no licence file and no stated terms. Used for research evaluation only; not redistributed; only code, metrics and figures are published. Thumbnails in the failure gallery and frames in the demo video are kept minimal and credited.
+- **Used:** tracking (MOT) train, validation and test-dev; detection (DET) train and validation.
+- **Splits:** DET train for training; DET validation for model selection; MOT validation for tracker tuning; MOT test-dev once, at the end.
+- **Known issue (D-308):** VisDrone's statement that its image set does not overlap its videos is false; {{RESULT:headline.json#data.visdrone_excluded_images|d}} overlapping detection images were removed from training and selection.
+
+## Mid-Air (distance ground truth, synthetic)
+
+- **Source:** https://midair.ulg.ac.be; scripts at https://github.com/montefiore-ai/midair-dataset.
+- **Citation:** Fonder, M. and Van Droogenbroeck, M. (2019) 'Mid-Air: a multi-modal dataset for extremely low altitude drone flights', *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops*. To verify before publication.
+- **Licence:** Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0). To re-check on the dataset page before release. Not redistributed.
+- **Used:** one climate (Kite_training, sunny), {{RESULT:headline.json#data.midair_total|d}} flights: depth, segmentation, surface normals and colour images of the left camera, plus flight records.
+- **Splits:** by flight, seed 0: {{RESULT:headline.json#data.midair_dev|d}} development, {{RESULT:headline.json#data.midair_cal|d}} calibration, {{RESULT:headline.json#data.midair_test|d}} test (`results/splits.json`).
+- **Limitation:** synthetic, with no people or vehicles; it validates the geometry, not the detector.
+
+## AU-AIR (real drone footage)
+
+- **Source:** https://bozcani.github.io/auairdataset (authors' page); also indexed at https://fmi-data-index.github.io/au_air.html.
+- **Citation:** Bozcan, I. and Kayacan, E. (2020) 'AU-AIR: a multi-modal unmanned aerial vehicle dataset for low altitude traffic surveillance', *IEEE International Conference on Robotics and Automation (ICRA)*. To verify before publication.
+- **Licence:** the third-party index states CC BY 4.0; the authors' annotation file lists CC BY-NC-SA 2.0 and CC BY-NC 2.0. The stricter reading is used: non-commercial research, attributed, and no AU-AIR images in this repository (D-323).
+- **Used:** all {{RESULT:headline.json#data.auair_frames|,d}} annotated frames (5 frames per second, {{RESULT:headline.json#data.auair_recordings|d}} recordings, {{RESULT:headline.json#data.auair_clips|d}} clips), with per-frame GPS position, altitude and drone attitude.
+- **Splits:** calibration recordings 20190829091111 and 20190905142119 for the camera model; the other six held out (D-506).
+- **Findings about the data:** altitude is in millimetres and drifts by metres within a flight; the camera tilt is not recorded; annotation boxes are looser than tight boxes (D-512) and not consistent from frame to frame (D-516); the paper's stated camera angles (45-90°) do not cover all clips (D-504).

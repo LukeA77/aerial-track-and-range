@@ -8,6 +8,11 @@ the largest absolute difference in box coordinates (px) and scores between match
 detections, and detection-level agreement (fraction matched at IoU >= 0.5 with the same
 class, in both directions). `{{PARITY_TOL}}` (configs/edge.yaml) is compared only if set;
 the actual differences are always reported. Writes results/edge/parity_<name>.json.
+
+The ONNX input shape matches what the original model sees (D-604): the library letterboxes a
+16:9 frame only to the next multiple of the stride (e.g. 960 x 544), so a square static export
+sees a differently padded image and gives different detections. `--square` keeps the old
+square export for comparison.
 """
 
 from __future__ import annotations
@@ -32,6 +37,12 @@ def _dets(model: object, img: np.ndarray, imgsz: int) -> tuple[np.ndarray, ...]:
     xyxy = r.boxes.xyxy.cpu().numpy()
     ltwh = np.column_stack([xyxy[:, :2], xyxy[:, 2:] - xyxy[:, :2]])
     return ltwh, r.boxes.conf.cpu().numpy(), r.boxes.cls.cpu().numpy().astype(int)
+
+
+def rect_height(imgsz: int, h: int, w: int, stride: int) -> int:
+    """Input height the library uses for a landscape frame scaled to width `imgsz`: the scaled
+    height rounded up to a multiple of the stride."""
+    return int(np.ceil(imgsz * h / w / stride) * stride)
 
 
 def compare(a: tuple, b: tuple) -> dict[str, float]:
@@ -67,6 +78,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--weights", required=True)
     ap.add_argument("--imgsz", type=int, required=True)
     ap.add_argument("--n-frames", type=int, default=50)
+    ap.add_argument("--square", action="store_true", help="square input (mismatched, D-604)")
+    ap.add_argument("--name", default=None, help="output stem (default: weights stem)")
     args = ap.parse_args(argv)
     import cv2
     import onnxruntime
@@ -75,16 +88,19 @@ def main(argv: list[str] | None = None) -> int:
 
     src = REPO_ROOT / args.weights
     model = YOLO(src)
-    onnx_path = Path(model.export(format="onnx", imgsz=args.imgsz, dynamic=False))
-    dest_onnx = REPO_ROOT / "weights" / f"{src.stem}_{args.imgsz}.onnx"
-    if onnx_path.resolve() != dest_onnx.resolve():
-        shutil.move(onnx_path, dest_onnx)
-    onnx_model = YOLO(dest_onnx, task="detect")
-
     frames = []
     for seq in sorted(p for p in PREP.iterdir() if p.is_dir()):
         info = json.loads((seq / "seqinfo.json").read_text())
         frames += sorted((REPO_ROOT / info["frame_dir"]).glob("*.jpg"))
+    h0, w0 = cv2.imread(str(frames[0])).shape[:2]
+    stride = int(max(model.model.stride))
+    shape = args.imgsz if args.square else [rect_height(args.imgsz, h0, w0, stride), args.imgsz]
+    onnx_path = Path(model.export(format="onnx", imgsz=shape, dynamic=False))
+    tag = "sq" if args.square else "rect"
+    dest_onnx = REPO_ROOT / "weights" / f"{args.name or src.stem}_{args.imgsz}_{tag}.onnx"
+    if onnx_path.resolve() != dest_onnx.resolve():
+        shutil.move(onnx_path, dest_onnx)
+    onnx_model = YOLO(dest_onnx, task="detect")
     rng = np.random.default_rng(load_config("project").require("seed"))
     pick = sorted(rng.choice(len(frames), size=min(args.n_frames, len(frames)), replace=False))
     rows = []
@@ -100,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         "weights": args.weights,
         "onnx": dest_onnx.name,
         "imgsz": args.imgsz,
+        "onnx_input_hw": shape if isinstance(shape, list) else [shape, shape],
         "n_frames": len(pick),
         "ultralytics": ultralytics.__version__,
         "onnxruntime": onnxruntime.__version__,

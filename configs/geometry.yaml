@@ -16,9 +16,9 @@ max_range_m:
   placeholder: MAX_RANGE_M
   source: null
 kalman_q:
-  value: null
+  value: 7.0
   placeholder: KALMAN_Q
-  source: null
+  source: "D-518: chosen on AU-AIR calibration recordings (no moving targets in Mid-Air) as the grid value whose median NIS is closest to 2 ln 2 (results/auair/kalman_q_tuning.json; median NIS 1.45 at 7.0). Units m^2/s^3. Set after the Phase 2 test run, which does not use it"
 terrain_motion:
   value: {frame_gaps: [1, 2, 5, 10], max_features: 1500, quality: 0.01, min_distance_px: 8, fb_max_px: 1.0, k_nearest: 30, min_support: 10, neighbours: image}
   placeholder: TERRAIN_MOTION

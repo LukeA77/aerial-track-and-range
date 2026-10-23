@@ -10,7 +10,7 @@ bottom-centre contact point is divided by the ground-truth box size:
 kappa_u, kappa_v are robust standard deviations (1.4826 x MAD) of those ratios, so
 sigma_u = kappa_u * width, sigma_v = kappa_v * height (Section 6.3). Reported per group, per
 box-height bin (to check that "proportional to size" holds) and overall. Validation split only.
-Writes results/visdrone/val/pixel_noise.json.
+Writes results/visdrone/val/<name>.json (default pixel_noise.json).
 """
 
 from __future__ import annotations
@@ -42,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--class-map", required=True)
     ap.add_argument("--imgsz", type=int, required=True)
     ap.add_argument("--frame-stride", type=int, default=10)
+    ap.add_argument("--name", default="pixel_noise", help="output file stem")
     args = ap.parse_args(argv)
     from ultralytics import YOLO
 
@@ -122,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
         "kappa_u": robust_sigma(a[:, 0]),
         "kappa_v": robust_sigma(a[:, 1]),
     }
-    dest = REPO_ROOT / "results" / "visdrone" / "val" / "pixel_noise.json"
+    dest = REPO_ROOT / "results" / "visdrone" / "val" / f"{args.name}.json"
     dest.write_text(json.dumps(out, indent=1) + "\n")
     print(
         json.dumps(

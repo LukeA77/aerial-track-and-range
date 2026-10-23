@@ -38,7 +38,7 @@ def _note(fig: plt.Figure, note: str | None) -> float:
     """Wrapped footnote at the bottom; returns the figure fraction it occupies."""
     if not note:
         return 0.0
-    text = textwrap.fill(note, width=120)
+    text = textwrap.fill(note, width=105)
     fig.text(0.01, 0.01, text, color=TEXT_2, fontsize=7, ha="left", va="bottom")
     return 0.035 * len(text.splitlines()) + 0.01
 
@@ -196,3 +196,113 @@ def write_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
+
+
+MUTED = "#86857f"  # dominated points: recessive grey (not a slot), >= 3:1 on SURFACE
+
+
+def pareto_frontier(points: Sequence[tuple[float, float]]) -> list[int]:
+    """Indices of points not dominated by another (lower x is better, higher y is better),
+    sorted by x."""
+    idx = sorted(range(len(points)), key=lambda i: (points[i][0], -points[i][1]))
+    front, best_y = [], float("-inf")
+    for i in idx:
+        if points[i][1] > best_y:
+            front.append(i)
+            best_y = points[i][1]
+    return front
+
+
+def pareto_chart(
+    path: Path,
+    names: Sequence[str],
+    x: Sequence[float],
+    y: Sequence[float],
+    budgets: Mapping[str, float],
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    note: str | None = None,
+    logx: bool = False,
+) -> None:
+    """Accuracy against latency (build.md 10.5). Frontier points in series slot 1, joined and
+    directly labelled (a label that would collide with one already placed is skipped; the CSV
+    lists every point); dominated points muted and unlabelled. Budgets are dashed vertical
+    reference lines labelled in text colour."""
+    fig, ax = plt.subplots(figsize=(6.4, 4.4), dpi=150)
+    fig.patch.set_facecolor(SURFACE)
+    front = pareto_frontier(list(zip(x, y, strict=True)))
+    others = [i for i in range(len(x)) if i not in front]
+    ax.scatter(
+        [x[i] for i in others],
+        [y[i] for i in others],
+        s=MARKER_PT**2,
+        color=MUTED,
+        edgecolor=SURFACE,
+        linewidth=1.0,
+        zorder=2,
+        label="Dominated",
+    )
+    ax.plot(
+        [x[i] for i in front],
+        [y[i] for i in front],
+        color=SERIES[0],
+        linewidth=LINE_PT,
+        marker="o",
+        markersize=MARKER_PT,
+        markeredgecolor=SURFACE,
+        markeredgewidth=1.0,
+        zorder=3,
+        label="Best trade-off",
+    )
+    for label, b in budgets.items():
+        ax.axvline(b, color=TEXT_2, linewidth=1.0, linestyle=(0, (4, 3)), zorder=1)
+        ax.annotate(
+            label,
+            (b, 1.0),
+            xycoords=("data", "axes fraction"),
+            xytext=(3, -4),
+            textcoords="offset points",
+            color=TEXT_2,
+            fontsize=7,
+            va="top",
+        )
+    _style(ax, title, xlabel, ylabel)
+    if logx:
+        ax.set_xscale("log")
+        lo, hi = min([*x, *budgets.values()]) * 0.8, max(x) * 1.25
+        ticks = [t for t in (20, 33, 50, 100, 200, 500, 1000) if lo <= t <= hi]
+        ax.set_xlim(lo, hi)
+        ax.set_xticks(ticks, [str(t) for t in ticks])
+        ax.minorticks_off()
+    else:
+        ax.set_xlim(left=0)
+    ax.legend(frameon=False, fontsize=8, labelcolor=TEXT_2, loc="lower left")
+    fig.canvas.draw()
+    placed: list[tuple[float, float]] = []
+    for i in front:
+        px, py = ax.transData.transform((x[i], y[i]))
+        if any(abs(px - qx) < 120 and abs(py - qy) < 14 for qx, qy in placed):
+            continue
+        placed.append((px, py))
+        ax.annotate(
+            names[i],
+            (x[i], y[i]),
+            xytext=(6, -4),
+            textcoords="offset points",
+            color=TEXT_2,
+            fontsize=7,
+            va="top",
+        )
+    bottom = _note(fig, note)
+    fig.tight_layout(rect=(0, bottom, 1, 1))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, facecolor=SURFACE)
+    plt.close(fig)
+    write_csv(
+        path.with_suffix(".csv"),
+        [
+            {"config": n, "x": a, "y": b, "frontier": i in front}
+            for i, (n, a, b) in enumerate(zip(names, x, y, strict=True))
+        ],
+    )

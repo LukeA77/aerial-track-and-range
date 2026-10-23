@@ -28,7 +28,10 @@ def test_stage_timings_and_percentiles():
     assert e["median_ms"] == pytest.approx(3.0, rel=0.3)
     assert r["throughput_fps"] == pytest.approx(1000 / e["mean_ms"], rel=1e-6)
     assert r["n_samples"] == 60
-    assert r["peak_traced_mb"] >= 0
+    assert (
+        r["peak_rss_mb"] > 0
+        and len(r["end_to_end_median_by_repeat_ms"]) == r["protocol"]["n_repeats"]
+    )
 
 
 def test_stage_output_feeds_next_stage():

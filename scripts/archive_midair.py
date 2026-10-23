@@ -77,6 +77,27 @@ def move_verified(src: Path, dst: Path) -> None:
     src.unlink()
 
 
+def restore_verified(src: Path, dst: Path, attempts: int = 5, wait_s: float = 30.0) -> bool:
+    """Copy a Drive file back and verify size and SHA-256. A local copy that already matches is
+    kept (an interrupted restore resumes). Transient Drive errors (for example timeouts) are
+    retried. Returns True if a copy was made."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if dst.exists() and dst.stat().st_size == src.stat().st_size and sha256(dst) == sha256(src):
+        return False
+    for k in range(attempts):
+        try:
+            shutil.copy2(src, dst)
+            if dst.stat().st_size == src.stat().st_size and sha256(dst) == sha256(src):
+                return True
+            raise RuntimeError(f"verification failed restoring {src}")
+        except OSError:
+            if k == attempts - 1:
+                raise
+            print(f"  Drive error on {src.name}, retrying in {wait_s:.0f} s", flush=True)
+            time.sleep(wait_s)
+    return True
+
+
 def trajectory_complete(local: Path, name: str) -> bool:
     for m in REQUIRED:
         d = local / m / name
@@ -85,14 +106,69 @@ def trajectory_complete(local: Path, name: str) -> bool:
     return True
 
 
+def select_names(
+    splits: dict[str, list[str]], chosen: list[str], only: list[str] | None
+) -> list[str]:
+    """Trajectories of the chosen splits, optionally restricted to `only` (each of which must
+    belong to one of those splits, so a typo cannot silently move nothing)."""
+    names = [n for s in chosen for n in splits[s]]
+    if only is None:
+        return names
+    stray = sorted(set(only) - set(names))
+    if stray:
+        raise ValueError(f"not in splits {chosen}: {stray}")
+    return [n for n in names if n in set(only)]
+
+
+def release_trajectory(local: Path, remote: Path, name: str) -> dict[str, int]:
+    """Free laptop space after a restored trajectory has been processed (batch test runs).
+
+    For each Drive-backed modality, the local frames are deleted only if the Drive folder holds
+    a file of the same name and size for every local frame; then an `.archived` marker is
+    written, exactly as after `--to-drive`. Colour frames (downloaded from the dataset site,
+    not kept on Drive) are deleted with a `.released` marker; the downloader can fetch them
+    again. Raises before deleting anything if any Drive copy is missing or differs in size.
+    """
+    plan = []
+    for m in MODALITIES:
+        d = local / m / name
+        if not d.is_dir():
+            continue
+        files = [f for f in sorted(d.iterdir()) if f.is_file() and not f.name.startswith(".")]
+        if m in REQUIRED:
+            r = remote / m / name
+            for f in files:
+                c = r / f.name
+                if not c.is_file() or c.stat().st_size != f.stat().st_size:
+                    raise RuntimeError(f"{name}/{m}: no matching Drive copy of {f.name}")
+            plan.append((d, files, ".archived", str(r) + "\n"))
+        else:
+            plan.append((d, files, ".released", "colour frames deleted after processing\n"))
+    counts = {}
+    for d, files, marker, text in plan:
+        for f in files:
+            f.unlink()
+        (d / marker).write_text(text)
+        counts[d.parent.name] = len(files)
+    return counts
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--to-drive", action="store_true")
     g.add_argument("--restore", action="store_true")
+    g.add_argument("--release", action="store_true", help="delete local copies kept on Drive")
+    g.add_argument(
+        "--prepare-download",
+        action="store_true",
+        help="clear the archived and done markers so the downloader fetches these again from "
+        "the dataset site (faster than reading back from Drive; same files)",
+    )
     ap.add_argument(
         "--splits", nargs="+", required=True, choices=["development", "calibration", "test"]
     )
+    ap.add_argument("--trajectories", nargs="+", default=None, help="only these, within --splits")
     ap.add_argument("--max-backlog-gb", type=float, default=6.0)
     ap.add_argument("--min-free-gb", type=float, default=8.0)
     args = ap.parse_args(argv)
@@ -105,8 +181,35 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Drive folder not found: {DRIVE_ROOT.parent}")
         return 1
     splits = json.loads((REPO_ROOT / "results" / "splits.json").read_text())["midair"]["splits"]
-    names = [n for s in args.splits for n in splits[s]]
+    names = select_names(splits, args.splits, args.trajectories)
     log = json.loads(LOG.read_text()) if LOG.exists() else []
+    if args.prepare_download:
+        for name in names:
+            for m in REQUIRED:
+                for marker in (".archived", ".frames.done"):
+                    (local / m / name / marker).unlink(missing_ok=True)
+            print(f"{name}: markers cleared for re-download", flush=True)
+        return 0
+    if args.release:
+        # Only trajectories this script has put on Drive (or brought back from it); the release
+        # itself checks a same-name, same-size Drive copy of every frame before deleting.
+        known = {e["trajectory"] for e in log if e["action"] in ("to_drive", "restored")}
+        for name in names:
+            if name not in known:
+                print(f"{name}: no Drive copy recorded by this script, not released")
+                continue
+            counts = release_trajectory(local, remote, name)
+            log.append(
+                {
+                    "utc": datetime.now(UTC).isoformat(timespec="seconds"),
+                    "trajectory": name,
+                    "action": "released",
+                    "files": sum(counts.values()),
+                }
+            )
+            LOG.write_text(json.dumps(log, indent=1) + "\n")
+            print(f"{name}: released {counts}", flush=True)
+        return 0
     baseline = drive_cache_gb()
     print(f"Drive cache at start: {baseline:.1f} GB (already-uploaded files, not a backlog)")
 
@@ -143,12 +246,7 @@ def main(argv: list[str] | None = None) -> int:
                 if args.to_drive:
                     move_verified(f, b / f.name)
                 else:
-                    b.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(f, b / f.name)
-                    if (b / f.name).stat().st_size != f.stat().st_size or sha256(
-                        b / f.name
-                    ) != sha256(f):
-                        raise RuntimeError(f"verification failed restoring {f}")
+                    restore_verified(f, b / f.name)
                 n_files += 1
             marker = local / m / name / ".archived"
             if args.to_drive:

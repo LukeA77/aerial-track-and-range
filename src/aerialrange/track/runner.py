@@ -83,16 +83,42 @@ class DetSet:
 
 def make_tracker(tracker_cfg: str, overrides: Mapping[str, Any] | None = None) -> Any:
     """A library tracker (ByteTrack, BoT-SORT, ...) built from a tracker YAML. `overrides`
-    replace YAML values (the validation grid, `{{TRACKER_GRID}}`); unknown keys are refused."""
+    replace YAML values (the validation grid, `{{TRACKER_GRID}}`); unknown keys are refused.
+    `gmc_downscale` sets BoT-SORT's camera-motion frame downscale (library default 2), which
+    the library does not read from YAML (Phase 5 speed options)."""
     from ultralytics.trackers.track import TRACKER_MAP
     from ultralytics.utils import YAML, IterableSimpleNamespace
 
     raw = YAML.load(tracker_cfg)
-    unknown = set(overrides or {}) - set(raw)
+    ov = dict(overrides or {})
+    gmc_downscale = ov.pop("gmc_downscale", None)  # not a YAML key in the library (Phase 5)
+    unknown = set(ov) - set(raw)
     if unknown:
         raise KeyError(f"tracker overrides not in {tracker_cfg}: {sorted(unknown)}")
-    cfg = IterableSimpleNamespace(**{**raw, **(overrides or {})})
-    return TRACKER_MAP[cfg.tracker_type](args=cfg)
+    cfg = IterableSimpleNamespace(**{**raw, **ov})
+    tracker = TRACKER_MAP[cfg.tracker_type](args=cfg)
+    if gmc_downscale is not None:
+        if not hasattr(tracker, "gmc"):
+            raise KeyError(f"gmc_downscale given but {cfg.tracker_type} has no motion compensation")
+        tracker.gmc.downscale = max(1, int(gmc_downscale))
+    return tracker
+
+
+def coast(tracker: Any, img: np.ndarray) -> list:
+    """Advance a library tracker by one frame without detections and return its confirmed
+    tracks (predicted). Mirrors the library's update up to matching: Kalman predict of the
+    tracked and lost tracks, then, for BoT-SORT, the camera-motion warp of those and of the
+    unconfirmed tracks. Tracks are neither confirmed, lost nor removed here."""
+    from ultralytics.trackers.utils.stracks import joint_stracks, multi_gmc
+
+    unconfirmed, tracked = tracker._split_tracked()
+    pool = joint_stracks(tracked, tracker.lost_stracks)
+    tracker.multi_predict(pool)
+    if hasattr(tracker, "gmc") and tracker.gmc.method is not None:
+        warp = tracker.gmc.apply(img, np.zeros((0, 4)))
+        multi_gmc(pool, warp)
+        multi_gmc(unconfirmed, warp)
+    return [t for t in tracked if t.is_activated]
 
 
 def run_sequence_custom(
@@ -101,6 +127,7 @@ def run_sequence_custom(
     tracker_cfg: str,
     class_to_group: Mapping[int, str],
     overrides: Mapping[str, Any] | None = None,
+    det_stride: int = 1,
 ) -> tuple[dict[str, np.ndarray], dict[str, float]]:
     """Track one sequence with any detection function (for example tiled detection, B3).
 
@@ -108,6 +135,12 @@ def run_sequence_custom(
     Same output as `run_sequence`: rows per group (frame, id, left, top, width, height, score),
     1-based frames, and timing totals (detection plus tracking). `overrides` as in
     `make_tracker`.
+
+    `det_stride` > 1 runs the detector on every `det_stride`-th frame only (Phase 5, D-610).
+    On the frames in between, the tracker is not updated (an update without detections would
+    delete new, not yet confirmed tracks); its motion model is advanced instead, exactly as
+    the library does before matching (Kalman predict of tracked and lost tracks, then the
+    camera-motion warp for BoT-SORT), and the predicted boxes of confirmed tracks are output.
     """
     import cv2
 
@@ -117,6 +150,16 @@ def run_sequence_custom(
     for k, f in enumerate(frames, start=1):
         img = cv2.imread(str(f)) if not isinstance(f, np.ndarray) else f
         t0 = time.perf_counter()
+        if (k - 1) % det_stride:
+            if hasattr(detect, "skip"):  # keep frame-indexed detection sources in step
+                detect.skip()
+            for t in coast(tracker, img):
+                g = class_to_group.get(int(t.cls))
+                if g is not None:
+                    x, y, w, h = t.tlwh
+                    rows[g].append((k, int(t.track_id), x, y, w, h, float(t.score)))
+            t_total += time.perf_counter() - t0
+            continue
         b, s, c = detect(img)
         b, s, c = np.asarray(b, float).reshape(-1, 4), np.asarray(s, float), np.asarray(c, int)
         keep = np.isin(c, list(class_to_group))

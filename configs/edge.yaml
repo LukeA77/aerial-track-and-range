@@ -12,22 +12,22 @@ latency_budget_ms:
   placeholder: LATENCY_BUDGET_MS
   source: "Derived: 1000 / target_fps (computed by the loader, never set by hand)"
 n_timed_frames:
-  value: null
+  value: 300
   placeholder: N_TIMED_FRAMES
-  source: null
+  source: "Chosen for stable percentiles (D-601): 3 repeats x 300 = 900 samples, so the 99th percentile rests on 9 samples; 300 consecutive frames stay within one 464-frame val sequence"
 n_warmup:
-  value: null
+  value: 20
   placeholder: N_WARMUP
-  source: null
+  source: "Chosen (D-601): covers model and tracker initialisation and first-call allocation; the per-repeat medians in each benchmark file show whether timing had settled"
 n_repeats:
-  value: null
+  value: 3
   placeholder: N_REPEATS
-  source: null
+  source: "Chosen (D-601): run-to-run drift (for example thermal) is visible in end_to_end_median_by_repeat_ms"
 threads_set:
-  value: null
+  value: [library default]
   placeholder: THREADS_SET
-  source: null
+  source: "D-601: PyTorch default intra-op threads (recorded per run as machine.torch_threads). Thread counts are varied later in the Pareto study (Section 10.5)"
 parity_tol:
-  value: null
+  value: 0.5
   placeholder: PARITY_TOL
-  source: null
+  source: "D-604: largest allowed box-coordinate difference (px) between original and ONNX for matched detections. Half a pixel is far below the measured box noise (about 4-11 % of box size, results/visdrone/val/pixel_noise.json), so it cannot change a match; detection agreement must also be 100 %"
