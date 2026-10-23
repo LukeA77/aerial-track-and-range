@@ -219,5 +219,6 @@ Luke's decisions: D + E + B + C. A fixed bumpiness value (plan A) was rejected a
 
 ## 2026-10-23: release settings and the brief
 
-- Release settings (`configs/release.yaml`, D-615): video at most 25 MB (pending Luke's confirmation; GitHub caps browser uploads at 25 MiB, LinkedIn allows 5 GB) and 90 s; licence AGPL-3.0-only.
+- Release settings (`configs/release.yaml`, D-615): video at most 20 MB (Luke; under GitHub's 25 MiB browser cap and LinkedIn's 5 GB) and 90 s; licence AGPL-3.0-only.
 - Voice sample (D-616): style profile in `docs/voice_sample.md`; Luke's letter is not in the repository. Brief rewritten in first person and now generated (`docs/brief.md`, abstract 106 words). All seven documents build with no unresolved tokens or banned phrases.
+- README approved by Luke as is (2026-10-23).

@@ -1,8 +1,8 @@
 # Release and presentation settings (Phase 6, build.md 11.3 and 13).
 max_video_mb:
-  value: 25
+  value: 20
   placeholder: MAX_VIDEO_MB
-  source: "D-615: the video goes to LinkedIn and GitHub (Luke, 2026-10-23). LinkedIn accepts up to 5 GB (LinkedIn help, video sharing troubleshooting, accessed 2026-10-23); GitHub warns above 50 MiB, blocks above 100 MiB and caps browser uploads at 25 MiB (GitHub docs, About large files on GitHub, accessed 2026-10-23). 25 MB works on both, including a browser upload"
+  source: "D-615: Luke, 2026-10-23 (20 MB). The video goes to LinkedIn and GitHub. LinkedIn accepts up to 5 GB (LinkedIn help, video sharing troubleshooting, accessed 2026-10-23); GitHub warns above 50 MiB, blocks above 100 MiB and caps browser uploads at 25 MiB (GitHub docs, About large files on GitHub, accessed 2026-10-23). 20 MB is under all of these"
 video_length_s:
   value: 90
   placeholder: VIDEO_LENGTH_S

@@ -4,13 +4,12 @@ Last updated: 2026-10-23.
 
 ## Decisions needed now
 
-1. **Confirm the video size limit**: 25 MB (set, D-615) or the 50 MB you offered. LinkedIn takes either; GitHub warns above 50 MB and refuses browser uploads above 25 MB. Length 90 s.
-2. **Review the drafts**: README (you are reading it), `docs/brief.md` (now in your voice), `docs/limitations.md`, `docs/model_card.md`, `docs/data_cards.md`, `docs/faq_for_reviewers.md`, `docs/cover_note.md` (fill its bracketed parts yourself).
-3. **References**: eight references in the brief are marked [verify]; Claude can check them against primary sources on request.
-4. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
-5. **Optional:** retrain B2 n 960 for more epochs on Kaggle; it peaked at its last epoch (50).
+1. **Review the drafts**: README approved by Luke (2026-10-23); still to review: `docs/brief.md` (now in your voice), `docs/limitations.md`, `docs/model_card.md`, `docs/data_cards.md`, `docs/faq_for_reviewers.md`, `docs/cover_note.md` (fill its bracketed parts yourself).
+2. **References**: eight references in the brief are marked [verify]; Claude can check them against primary sources on request.
+3. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
+4. **Optional:** retrain B2 n 960 for more epochs on Kaggle; it peaked at its last epoch (50).
 
-Resolved 2026-10-23 (D-615, D-616): writing sample (style profile in `docs/voice_sample.md`; the letter stays out of the repository); licence AGPL-3.0-only; video limits set to 25 MB / 90 s pending item 1.
+Resolved 2026-10-23 (D-615, D-616): writing sample (style profile in `docs/voice_sample.md`; the letter stays out of the repository); licence AGPL-3.0-only; video limits 20 MB / 90 s (Luke); README approved as is.
 
 Resolved 2026-10-19 to 20: uncertainty on rough terrain (plans D, E and B built, D-401 to D-404); GPU training (three B2 models trained on Kaggle).
 
@@ -33,7 +32,7 @@ Resolved: VisDrone DET train and val are present and valid (2026-10-19).
 11. **`{{TARGET_FPS}}`**: resolved, 30 fps (stretch), with 10 fps reported as a reference (D-322).
 12. Licence variant: resolved, AGPL-3.0-only (D-615).
 13. `{{VOICE_SAMPLE}}`: resolved (D-616).
-14. `{{MAX_VIDEO_MB}}`, `{{VIDEO_LENGTH_S}}`: set to 25 MB and 90 s (D-615); confirm the size above.
+14. `{{MAX_VIDEO_MB}}`, `{{VIDEO_LENGTH_S}}`: resolved, 20 MB and 90 s (D-615).
 
 ## Placeholders I introduced (no action needed unless you want to set them)
 
