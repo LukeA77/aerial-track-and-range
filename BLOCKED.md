@@ -4,10 +4,11 @@ Last updated: 2026-10-23.
 
 ## Decisions needed now
 
-1. **Review the drafts**: README approved by Luke (2026-10-23); still to review: `docs/brief.md` (now in your voice), `docs/limitations.md`, `docs/model_card.md`, `docs/data_cards.md`, `docs/faq_for_reviewers.md`, `docs/cover_note.md` (fill its bracketed parts yourself).
-2. **References**: eight references in the brief are marked [verify]; Claude can check them against primary sources on request.
-3. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
-4. **Optional:** retrain B2 n 960 for more epochs on Kaggle; it peaked at its last epoch (50).
+1. **Watch the showcase clips** in `cache/video/showcase/` (D-618; no words, five clips) and the narrated alternative `cache/video/demo.mp4`. Tell Claude what to change. Put the dataset credits in the post text (AU-AIR CC BY 4.0 requires attribution). Two licence points before posting: VisDrone states no licence (research use only), and Mid-Air frames are CC BY-NC-SA 4.0 (non-commercial, share-alike). A personal portfolio post is most likely non-commercial use, and the video credits both on screen, but that is a judgement, not legal advice; say if you want the VisDrone scene removed to be safe.
+2. **Review the drafts**: README approved by Luke (2026-10-23); still to review: `docs/brief.md` (now in your voice), `docs/limitations.md`, `docs/model_card.md`, `docs/data_cards.md`, `docs/faq_for_reviewers.md`, `docs/cover_note.md` (fill its bracketed parts yourself).
+3. **References**: eight references in the brief are marked [verify]; Claude can check them against primary sources on request.
+4. **B1 weights (optional).** The MOT17-trained `.pt` file from Luke's Kaggle run, if he still has it.
+5. **Optional:** retrain B2 n 960 for more epochs on Kaggle; it peaked at its last epoch (50).
 
 Resolved 2026-10-23 (D-615, D-616): writing sample (style profile in `docs/voice_sample.md`; the letter stays out of the repository); licence AGPL-3.0-only; video limits 20 MB / 90 s (Luke); README approved as is.
 

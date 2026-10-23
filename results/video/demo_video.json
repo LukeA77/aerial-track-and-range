@@ -1,0 +1,176 @@
+{
+ "generated_utc": "2026-10-23T10:47:09+00:00",
+ "file": "cache/video/demo.mp4",
+ "seconds": 79.88,
+ "size_mb": 17.77,
+ "limits": {
+  "max_video_mb": 20.0,
+  "video_length_s": 90.0,
+  "source": "configs/release.yaml (D-615)"
+ },
+ "within_limits": true,
+ "encoding": {
+  "codec": "H.264 (libx264, two-pass)",
+  "kbps": 1802,
+  "size": "1280x720",
+  "fps": 25
+ },
+ "scenes": [
+  {
+   "scene": "1 title",
+   "end_s": 5.04
+  },
+  {
+   "scene": "2 VisDrone tracking",
+   "end_s": 20.56
+  },
+  {
+   "scene": "3 AU-AIR ranging and repeatability",
+   "end_s": 40.84
+  },
+  {
+   "scene": "4 Mid-Air flag",
+   "end_s": 60.12
+  },
+  {
+   "scene": "5 speed",
+   "end_s": 69.96
+  },
+  {
+   "scene": "6 limits and credits",
+   "end_s": 79.88
+  }
+ ],
+ "numbers_from": "results/headline.json plus the values below, computed by this script",
+ "computed": {
+  "visdrone": {
+   "sequence": "uav0000305_00000_v",
+   "split": "val",
+   "idf1_this_sequence": {
+    "B0_yolo26n_640_botsort_cmc": {
+     "person": 0.0,
+     "vehicle": 0.11786372007366483
+    },
+    "B2_yolo26n_960_tuned": {
+     "person": 0.2210357714895889,
+     "vehicle": 0.8815206825791122
+    }
+   }
+  },
+  "auair_clip": {
+   "clip": 20,
+   "frames": [
+    94,
+    158
+   ],
+   "run": "cache/runs/auair_clip20_acc",
+   "rows_shown": 777,
+   "tracks_shown": 24,
+   "flags_shown": {
+    "reliable": 650,
+    "uncertain": 127
+   },
+   "height_m": [
+    21.0,
+    30.5
+   ],
+   "setting": "B2 YOLO26n ONNX 960, tuned BoT-SORT, detection every frame"
+  },
+  "auair_repeatability_by_depression": {
+   "0-10": {
+    "n": 71,
+    "median_m": 0.10552277197648532,
+    "ci95": [
+     0.05198399350925784,
+     0.21277103694053756
+    ],
+    "p90_m": 1.3373217506675392
+   },
+   "10-20": {
+    "n": 212,
+    "median_m": 0.08319911124973,
+    "ci95": [
+     0.05257938703678002,
+     0.0983304216795313
+    ],
+    "p90_m": 0.43296745290644045
+   },
+   "20-40": {
+    "n": 54,
+    "median_m": 0.05772862099262838,
+    "ci95": [
+     0.025083407641054933,
+     0.08537845269320765
+    ],
+    "p90_m": 0.41007819940750767
+   },
+   "40-60": {
+    "n": 3,
+    "median_m": 0.020993004869287714,
+    "ci95": [
+     0.015312947581466126,
+     0.03669061067283313
+    ],
+    "p90_m": 0.033551089512124044
+   }
+  },
+  "midair": {
+   "trajectory": "trajectory_0026",
+   "split": "development (flag and calibration fitted on the calibration flights)",
+   "keyframes": [
+    700,
+    725,
+    750,
+    775,
+    800,
+    825,
+    850,
+    875,
+    900,
+    925,
+    950,
+    975,
+    1000,
+    1025,
+    1050,
+    1075,
+    1100,
+    1125,
+    1150,
+    1175,
+    1200,
+    1225,
+    1250,
+    1275,
+    1300,
+    1325,
+    1350,
+    1375,
+    1400,
+    1425,
+    1450,
+    1475
+   ],
+   "points_per_keyframe": 40,
+   "whole_flight": {
+    "estimates": 42922,
+    "bad_share": 0.1873631238059736,
+    "flag_recall": 0.6821686147724446,
+    "flag_precision": 0.5091415313225058
+   }
+  },
+  "speed": {
+   "configs": 22,
+   "frontier": [
+    "p5_mt_onnx640_bot8_s3",
+    "p5_mt_onnx640_bot8_s2",
+    "p5_mt_onnx960_bot8_s3",
+    "p5_mt_onnx960_bot8_s2",
+    "p5_mt_onnx960_bot8_s1",
+    "p5_onnx960_bot4",
+    "p5_onnx960_bot2"
+   ],
+   "budget_ms": 33.333333333333336
+  }
+ }
+}

@@ -44,3 +44,41 @@ Commands run from the repository root with the project virtual environment. On W
    Then track with `--weights cache/train/B2_yolo26n_640/weights/best.pt --class-map visdrone10`.
 4. B3 tiled inference, the tracker grid, and the pixel-noise fit (`{{SIGMA_PIX_MODEL}}`) are all on val.
 5. Test-dev, once: rerun the frozen configurations with `--split test-dev --final`.
+
+## VisDrone tracker tuning and final run (Phase 3, D-319 to D-321, D-605)
+
+1. Cache validation detections once per detector: `python scripts/cache_detections.py --run B2_yolo26n_960 --weights cache/train/B2_yolo26n_960/weights/best.pt --class-map visdrone10 --imgsz 960`
+2. Tracker grid on validation: `python scripts/track_grid.py --dets B2_yolo26n_960 --class-map visdrone10 --tracker configs/trackers/botsort_cmc.yaml --workers 3` (three workers fit in 15 GB of memory), then `python scripts/grid_summary.py`.
+3. Detector speed comparison: `python scripts/benchmark_pipeline.py --run B2_yolo26n_960 --weights ... --imgsz 960` (quiet machine).
+4. Freeze, then test-dev once: `python scripts/freeze.py --phase phase3 --extra cache/train/B2_yolo26n_960/weights/best.pt configs/trackers/botsort_cmc_tuned_B2_yolo26n_960.yaml`, then `cache/phase3_test.sh B2_yolo26n_960 960`.
+5. Analysis of the saved test-dev predictions (no rerun): `python scripts/track_breakdowns.py --run B2_yolo26n_960_tuned_botsort_cmc --split test-dev --final`; failure gallery on validation: `python scripts/track_tuned.py --dets B2_yolo26n_960` then `python scripts/failure_gallery.py --run B2_yolo26n_960_tuned`.
+
+## Mid-Air final run when disk is short (Phase 2, D-606, D-607)
+
+`cache/phase2_test.sh`: in batches of three test flights, downloads each from the Mid-Air site (`archive_midair.py --prepare-download`, `download_midair.py`), evaluates, runs terrain, and releases the local copies (`archive_midair.py --release`); then `midair_eval.py --from-cache`, `midair_analyse.py`, `midair_calibrate.py --apply-test`, `terrain_analyse.py`, all with `--final`. It checks the Phase 2 freeze first.
+
+## AU-AIR (Phase 4)
+
+1. `python scripts/inspect_auair.py`; `python scripts/auair_frames.py`; `python scripts/contact_sheets.py` (Luke labels `docs/auair_clip_notes.md`); `python scripts/auair_labels.py`.
+2. Detector and tracker on all clips: `python scripts/auair_track.py --run B2_yolo26n_960 --weights cache/train/B2_yolo26n_960/weights/best.pt --imgsz 960`.
+3. Camera model on calibration recordings: `python scripts/auair_scale.py`.
+4. Stationary segments: `python scripts/auair_stationary.py --run B2_yolo26n_960` and `--run truth --noise-from B2_yolo26n_960`.
+5. Tilt from motion: `python scripts/auair_tilt.py --workers 4`.
+6. Calibration checks: `python scripts/auair_repeatability.py --run B2_yolo26n_960 --split calibration`; `python scripts/auair_repeatability_view.py --source B2_yolo26n_960 --split calibration`.
+7. Freeze and held-out once: `python scripts/freeze.py --phase phase4_view`, then `python scripts/auair_repeatability_view.py --source B2_yolo26n_960 --split held_out --final` (and `--source truth`).
+8. Moving targets: `python scripts/auair_moving.py --run B2_yolo26n_960 --tune` (calibration), then without `--tune`.
+
+## Speed (Phase 5, D-601 to D-612)
+
+1. ONNX export with parity: `python scripts/export_onnx.py --weights cache/train/B2_yolo26n_960/weights/best.pt --imgsz 960 --name B2_yolo26n` (and `--imgsz 640 --name B2_yolo26n_960w`).
+2. INT8: `python scripts/quantize_onnx.py --onnx weights/B2_yolo26n_960_rect.onnx --head-fp32 model.23/`.
+3. Accuracy of each option on validation: `cache/phase5_accuracy.sh`, `cache/phase5_stride.sh`.
+4. Benchmarks on a quiet, plugged-in machine (sleep is blocked by `cache/keep_awake.py`): `cache/phase5_bench.sh`, `cache/phase5_bench2.sh`.
+5. Chart: `python scripts/pareto.py`.
+
+## End-to-end pipeline and documents (Phase 6, D-613)
+
+- Synthetic demo (no datasets): `aerialrange demo --out cache/demo`.
+- A real flight: `python scripts/auair_export_flight.py --clip 35`, then `aerialrange run --source cache/auair/flights/clip_35/frames --metadata cache/auair/flights/clip_35/metadata.csv --out cache/runs/auair_clip35`.
+- Documents: edit `docs/src/*.md`, then `python scripts/build_docs.py` (rebuilds `results/headline.json`, fills every number, refuses unresolved placeholders and banned phrases).
+- Demo video (D-617): `python scripts/auair_export_flight.py --clip 20`, then the accurate run of its first 158 frames (see `scripts/make_video.py` docstring), then `python scripts/make_video.py` (writes `cache/video/demo.mp4` within `configs/release.yaml` limits and `results/video/demo_video.json`). Needs `ffmpeg` on the PATH.

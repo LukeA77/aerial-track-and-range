@@ -25,7 +25,7 @@ A drone camera spots people and cars, follows them, works out **how far away eac
 | Phase 3: tracking | ✅ **Done.** Final test result in (section 3) |
 | Phase 4: real footage (AU-AIR) | ✅ **Done.** Held-out result and speed plausibility in |
 | Phase 5: speed | ✅ **Done.** 30 fps throughput reached (section 3) |
-| Phase 6: write-up and video | ~50 %. `aerialrange run` and `demo` built; README, limitations, cards, FAQ, cover note and brief (in your voice) drafted; README approved; other drafts await your review; video not started (20 MB, 90 s) |
+| Phase 6: write-up and video | ~75 %. `aerialrange run` and `demo` built; README, limitations, cards, FAQ, cover note and brief (in your voice) drafted; README approved; other drafts await your review; five no-words showcase clips plus a narrated demo video built, waiting for you to watch them |
 
 **Overall: Phases 0-5 done; Phase 6 under way** (end-to-end pipeline, documents drafted). 358 automated tests pass.
 
