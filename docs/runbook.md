@@ -50,12 +50,12 @@ Commands run from the repository root with the project virtual environment. On W
 1. Cache validation detections once per detector: `python scripts/cache_detections.py --run B2_yolo26n_960 --weights cache/train/B2_yolo26n_960/weights/best.pt --class-map visdrone10 --imgsz 960`
 2. Tracker grid on validation: `python scripts/track_grid.py --dets B2_yolo26n_960 --class-map visdrone10 --tracker configs/trackers/botsort_cmc.yaml --workers 3` (three workers fit in 15 GB of memory), then `python scripts/grid_summary.py`.
 3. Detector speed comparison: `python scripts/benchmark_pipeline.py --run B2_yolo26n_960 --weights ... --imgsz 960` (quiet machine).
-4. Freeze, then test-dev once: `python scripts/freeze.py --phase phase3 --extra cache/train/B2_yolo26n_960/weights/best.pt configs/trackers/botsort_cmc_tuned_B2_yolo26n_960.yaml`, then `cache/phase3_test.sh B2_yolo26n_960 960`.
+4. Freeze, then test-dev once: `python scripts/freeze.py --phase phase3 --extra cache/train/B2_yolo26n_960/weights/best.pt configs/trackers/botsort_cmc_tuned_B2_yolo26n_960.yaml`, then `scripts/queues/phase3_test.sh B2_yolo26n_960 960`.
 5. Analysis of the saved test-dev predictions (no rerun): `python scripts/track_breakdowns.py --run B2_yolo26n_960_tuned_botsort_cmc --split test-dev --final`; failure gallery on validation: `python scripts/track_tuned.py --dets B2_yolo26n_960` then `python scripts/failure_gallery.py --run B2_yolo26n_960_tuned`.
 
 ## Mid-Air final run when disk is short (Phase 2, D-606, D-607)
 
-`cache/phase2_test.sh`: in batches of three test flights, downloads each from the Mid-Air site (`archive_midair.py --prepare-download`, `download_midair.py`), evaluates, runs terrain, and releases the local copies (`archive_midair.py --release`); then `midair_eval.py --from-cache`, `midair_analyse.py`, `midair_calibrate.py --apply-test`, `terrain_analyse.py`, all with `--final`. It checks the Phase 2 freeze first.
+`scripts/queues/phase2_test.sh`: in batches of three test flights, downloads each from the Mid-Air site (`archive_midair.py --prepare-download`, `download_midair.py`), evaluates, runs terrain, and releases the local copies (`archive_midair.py --release`); then `midair_eval.py --from-cache`, `midair_analyse.py`, `midair_calibrate.py --apply-test`, `terrain_analyse.py`, all with `--final`. It checks the Phase 2 freeze first.
 
 ## AU-AIR (Phase 4)
 
@@ -72,8 +72,8 @@ Commands run from the repository root with the project virtual environment. On W
 
 1. ONNX export with parity: `python scripts/export_onnx.py --weights cache/train/B2_yolo26n_960/weights/best.pt --imgsz 960 --name B2_yolo26n` (and `--imgsz 640 --name B2_yolo26n_960w`).
 2. INT8: `python scripts/quantize_onnx.py --onnx weights/B2_yolo26n_960_rect.onnx --head-fp32 model.23/`.
-3. Accuracy of each option on validation: `cache/phase5_accuracy.sh`, `cache/phase5_stride.sh`.
-4. Benchmarks on a quiet, plugged-in machine (sleep is blocked by `cache/keep_awake.py`): `cache/phase5_bench.sh`, `cache/phase5_bench2.sh`.
+3. Accuracy of each option on validation: `scripts/queues/phase5_accuracy.sh`, `scripts/queues/phase5_stride.sh`.
+4. Benchmarks on a quiet, plugged-in machine (sleep is blocked by `scripts/queues/keep_awake.py` on Windows): `scripts/queues/phase5_bench.sh`, `scripts/queues/phase5_bench2.sh`.
 5. Chart: `python scripts/pareto.py`.
 
 ## End-to-end pipeline and documents (Phase 6, D-613)

@@ -1,4 +1,4 @@
-# Targets from build.md Section 5. Targets for later phases print a notice until implemented.
+# Common tasks. Dataset-dependent experiments are listed, in order, in docs/runbook.md.
 # On Windows the venv interpreter lives in .venv/Scripts; elsewhere in .venv/bin.
 ifeq ($(OS),Windows_NT)
 PY ?= .venv/Scripts/python
@@ -6,17 +6,14 @@ else
 PY ?= .venv/bin/python
 endif
 
-.PHONY: setup setup-train lint test data-check env midair-eval auair-prep auair-eval visdrone-prep \
-        train track-eval export bench demo docs all-results
+.PHONY: setup lint test data-check env midair-eval visdrone-prep \
+        demo docs pareto
 
 setup:
 	python -m venv .venv
 	$(PY) -m pip install --upgrade pip
 	$(PY) -m pip install -r requirements-lock.txt
 	$(PY) -m pip install -e . --no-deps
-
-setup-train: setup
-	$(PY) -m pip install -r requirements-train-lock.txt
 
 lint:
 	$(PY) -m ruff check src tests scripts
@@ -44,5 +41,14 @@ visdrone-prep:
 	$(PY) scripts/visdrone_overlap.py
 	$(PY) scripts/visdrone_prep.py --mot --det
 
-auair-prep auair-eval train track-eval export bench demo docs all-results:
-	@echo "'$@' is not implemented yet (later phase; see build.md Section 12)." && exit 1
+# Whole pipeline on a synthetic flight, checked against its truth (no datasets needed).
+demo:
+	$(PY) -m aerialrange.cli demo --out cache/demo
+
+# Rebuild results/headline.json and every document from docs/src/ (fails on any unfilled number).
+docs:
+	$(PY) scripts/build_docs.py
+
+# Final Pareto chart from the saved benchmark and accuracy records.
+pareto:
+	$(PY) scripts/pareto.py

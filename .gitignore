@@ -1,6 +1,6 @@
 # R7: data and model weights are never committed
-Data/
-data/
+/Data/
+/data/
 *.zip
 *.hdf5
 *.h5

@@ -191,6 +191,7 @@ def main(argv: list[str] | None = None) -> int:
                 "_r": r,
             }
         )
+
     def key(t: dict) -> float:
         return t["median_spread_hover_m"] if t["median_spread_hover_m"] is not None else np.inf
 
