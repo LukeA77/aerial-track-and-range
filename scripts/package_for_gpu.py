@@ -4,8 +4,8 @@ Usage: python scripts/package_for_gpu.py
 
 Writes cache/gpu_package/visdrone_yolo.zip containing images/, labels/ and a dataset YAML
 with a relative path, plus cache/gpu_package/manifest.json (image and label counts, the
-D-308 exclusions, and the zip's SHA-256 so the upload can be checked). Luke uploads the zip
-himself as a PRIVATE dataset (BLOCKED.md); nothing here uploads anything.
+D-308 exclusions, and the zip's SHA-256 so the upload can be checked). The zip is uploaded by
+hand as a PRIVATE dataset (VisDrone has no stated licence); nothing here uploads anything.
 """
 
 from __future__ import annotations

@@ -64,7 +64,7 @@ class Config:
             tag = f"{{{{{p.placeholder}}}}}" if p.placeholder else "(no placeholder name)"
             raise MissingParameterError(
                 f"{self.name}.{key} is unresolved {tag}. Resolve it as build.md R2 says "
-                f"(measure, cite a primary source, or ask Luke via BLOCKED.md) and record "
+                f"(measure it or cite a primary source) and record "
                 f"the source in configs/{self.name}.yaml."
             )
         return p.value

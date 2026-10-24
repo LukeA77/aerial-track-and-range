@@ -1,5 +1,3 @@
-**DRAFT.** Numbers are filled from `results/` (R1).
-
 # Model card: detector and tracker
 
 ## What it is

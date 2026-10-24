@@ -18,7 +18,7 @@ range_sigma_rel_by_depression:
 reliable_max_rel_sigma:
   value: 0.10
   placeholder: REL_UNC_THRESHOLD
-  source: "A range is 'uncertain' when sigma / range exceeds 10 %, the large-error threshold Luke set (err_threshold_frac, D-314); 'invalid' when no ground point exists (no tilt, at or above the horizon)"
+  source: "A range is 'uncertain' when sigma / range exceeds 10 %, the large-error threshold (err_threshold_frac, D-314); 'invalid' when no ground point exists (no tilt, at or above the horizon)"
 kalman:
   value: {q: 7.0, meas_rel_sigma: [0.0082, 0.0039, 0.0022, 0.0019, 0.0035], max_unseen_frames: 30}
   placeholder: null

@@ -2,7 +2,7 @@
 max_video_mb:
   value: 20
   placeholder: MAX_VIDEO_MB
-  source: "D-615: Luke, 2026-10-23 (20 MB). The video goes to LinkedIn and GitHub. LinkedIn accepts up to 5 GB (LinkedIn help, video sharing troubleshooting, accessed 2026-10-23); GitHub warns above 50 MiB, blocks above 100 MiB and caps browser uploads at 25 MiB (GitHub docs, About large files on GitHub, accessed 2026-10-23). 20 MB is under all of these"
+  source: "D-615: videos are posted on LinkedIn and GitHub. LinkedIn accepts up to 5 GB (LinkedIn help, video sharing troubleshooting, accessed 2026-10-23); GitHub warns above 50 MiB, blocks above 100 MiB and caps browser uploads at 25 MiB (GitHub docs, About large files on GitHub, accessed 2026-10-23). 20 MB is under all of these"
 video_length_s:
   value: 90
   placeholder: VIDEO_LENGTH_S
@@ -10,12 +10,8 @@ video_length_s:
 abstract_words:
   value: 120
   placeholder: ABSTRACT_WORDS
-  source: "D-614: set by Claude from the two-page brief limit"
+  source: "D-614: set from the two-page brief limit"
 licence:
   value: AGPL-3.0-only
   placeholder: LICENCE
-  source: "Luke, 2026-10-23 ('only'), matching pyproject.toml; Ultralytics is AGPL-3.0 (risk R8)"
-voice_sample:
-  value: docs/voice_sample.md
-  placeholder: VOICE_SAMPLE
-  source: "D-616: a style profile drawn from Luke's writing sample (a personal application letter that stays on Luke's machine, outside the repository, because it holds personal details); the profile holds no personal content"
+  source: "Matching pyproject.toml; Ultralytics is AGPL-3.0 (risk R8)"

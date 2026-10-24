@@ -2,15 +2,15 @@
 detector_family:
   value: YOLO26
   placeholder: DETECTOR_FAMILY
-  source: "Claude 2026-10-19: newest family documented in the installed library (ultralytics 8.4.182, cfg/models/26), which also offers a P2 small-object variant (D-307)"
+  source: "2026-10-19: newest family documented in the installed library (ultralytics 8.4.182, cfg/models/26), which also offers a P2 small-object variant (D-307)"
 detector_sizes:
   value: [n, s]
   placeholder: DETECTOR_SIZES
-  source: "Claude 2026-10-19: the CPU real-time goal (Pillar C) rules out larger sizes; the probe on this CPU was 183 ms/frame for n at 640 under load (D-307)"
+  source: "2026-10-19: the CPU real-time goal (Pillar C) rules out larger sizes; the probe on this CPU was 183 ms/frame for n at 640 under load (D-307)"
 input_sizes:
   value: [640, 960, 1280]
   placeholder: INPUT_SIZES
-  source: "Claude 2026-10-19: library default, midpoint, and near native VisDrone width (1344 px in MOT val) for small objects (D-307)"
+  source: "2026-10-19: library default, midpoint, and near native VisDrone width (1344 px in MOT val) for small objects (D-307)"
 train_hyperparams:
   value: null
   placeholder: TRAIN_HYPERPARAMS

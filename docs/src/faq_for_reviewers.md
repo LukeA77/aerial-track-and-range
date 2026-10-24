@@ -1,5 +1,3 @@
-**DRAFT.** Numbers are filled from `results/` (R1).
-
 # Questions a reviewer is likely to ask
 
 **How accurate is the range, and at what distances?** On the Mid-Air test flights (synthetic, so the truth is exact), the terrain-from-motion method has a median distance error of {{RESULT:headline.json#midair_test.terrain_median|.1%}} (95 % interval {{RESULT:headline.json#midair_test.terrain_median_ci.0|.1%}} to {{RESULT:headline.json#midair_test.terrain_median_ci.1|.1%}}), with {{RESULT:headline.json#midair_test.terrain_valid|.0%}} of estimates valid, but one estimate in ten is more than {{RESULT:headline.json#midair_test.terrain_p90|.0%}} off. A flat ground plane with a take-off altimeter, the simple approach, has a median error of {{RESULT:headline.json#midair_test.flat_alt_median|.0%}}. On real footage (AU-AIR) there is no ground truth, so only repeatability is measured: stationary vehicles' positions repeat to {{RESULT:headline.json#auair.heldout_rel_all|.1%}} of their distance. Ranges tested are short (low-altitude flight); no long-range claim is made. Evidence: `results/midair/test/terrain/`, `results/auair/repeatability_view_held_out_B2_yolo26n_960.json`.

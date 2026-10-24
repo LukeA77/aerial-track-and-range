@@ -58,7 +58,7 @@ print("device:", torch.cuda.get_device_name(0))
 #  - epochs 50 (default 100) with early stopping patience 10 (default 100): fine-tuning a
 #    pretrained detector converges well before 100 epochs, and the GPU quota is 30 h/week;
 #    training stops when DET-val mAP has not improved for 10 epochs (Section 4.5 allows DET
-#    val for early stopping). Luke's MOT17 run used 30 epochs.
+#    val for early stopping). The earlier MOT17 run used 30 epochs.
 #  - cache="ram": keep decoded images in memory so the GPU is not starved by JPEG decoding.
 OVERRIDES = {"epochs": 50, "patience": 10, "cache": "ram"}
 

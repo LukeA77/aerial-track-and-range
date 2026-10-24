@@ -2,7 +2,7 @@
 
 Usage: python scripts/auair_scale.py
 
-Only straight-down clips (Luke's labels, D-504) of the calibration recordings (D-506).
+Only straight-down clips (the manual labels, D-504) of the calibration recordings (D-506).
 1. Altimeter offset h0 from the image scale change between frames 3, 5, 8 or 12 apart that
    differ by at least `MIN_CLIMB_M` in altitude; per recording, a robust linear drift in time.
 2. Focal length from image-centre shift against GPS displacement between frames 5 or 10 apart

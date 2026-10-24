@@ -1,4 +1,4 @@
-"""AU-AIR contact sheets and clip notes for Luke's tilt labels (build.md Section 8.2).
+"""AU-AIR contact sheets and clip notes for the author's tilt labels (build.md Section 8.2).
 
 Usage: python scripts/contact_sheets.py
 
@@ -6,7 +6,7 @@ For each clip in cache/auair/frames.csv (scripts/auair_frames.py), 12 frames spr
 time are tiled 4 x 3, each labelled with frame index, altitude and the two small angles. Sheets
 go to cache/auair/contact_sheets/clip_NN.jpg: they are made of AU-AIR images and are not
 committed (D-323). docs/auair_clip_notes.md lists each clip's altitude profile and attitude
-statistics, with empty columns for Luke's labels (straight-down or oblique, lens curvature).
+statistics, with empty columns for the manual labels (straight-down or oblique, lens curvature).
 """
 
 from __future__ import annotations
@@ -79,9 +79,9 @@ def main() -> int:
         "and which is pitch is not yet resolved. Contact sheets are in "
         "`cache/auair/contact_sheets/` (not committed: AU-AIR images, D-323).",
         "",
-        "**For Luke:** open each sheet and fill the last two columns. **View**: `down` "
-        "(camera looks straight down), `oblique` (camera looks forward at an angle; give a "
-        "rough angle below the horizon if you can: 0 = looking at the horizon, "
+        "**Labels** (filled by hand from the sheets): **View**: `down` "
+        "(camera looks straight down), `oblique` (camera looks forward at an angle; a "
+        "rough angle below the horizon, where 0 = looking at the horizon, "
         "90 = straight down, so `oblique ~45` is halfway), or `mixed` "
         "(the view changes within the clip). **Curvature**: `yes` if straight lines (road "
         "edges, markings) bend near the image edges, otherwise `no`.",

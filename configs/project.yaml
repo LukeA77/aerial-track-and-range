@@ -2,15 +2,15 @@
 repo_name:
   value: aerial-track-and-range
   placeholder: REPO_NAME
-  source: "Luke, 2026-10-18 (session answer)"
+  source: "2026-10-18"
 package_name:
   value: aerialrange
   placeholder: REPO_NAME
-  source: "Luke, 2026-10-18 (session answer)"
+  source: "2026-10-18"
 licence:
   value: AGPL-3.0-only
   placeholder: LICENCE
-  source: "Luke chose AGPL-3.0, 2026-10-18; -only vs -or-later still to confirm"
+  source: "Chosen 2026-10-18 (AGPL-3.0-only, D-005, D-615)"
 python_version:
   value: "3.12"
   placeholder: PYTHON_VERSION

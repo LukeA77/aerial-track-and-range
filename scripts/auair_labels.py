@@ -1,4 +1,4 @@
-"""Parse Luke's clip labels from docs/auair_clip_notes.md (build.md Section 8.2).
+"""Parse Manual clip labels from docs/auair_clip_notes.md (build.md Section 8.2).
 
 Usage: python scripts/auair_labels.py
 

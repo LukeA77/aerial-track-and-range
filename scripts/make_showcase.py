@@ -1,5 +1,5 @@
-"""Showcase clips with no words (Luke, 2026-10-23, D-618): footage with the system's output
-drawn on it, and nothing else (no titles, captions, legends or credits on screen; Luke writes
+"""Showcase clips with no words (2026-10-23, D-618): footage with the system's output
+drawn on it, and nothing else (no titles, captions, legends or credits on screen; The author writes
 the story and the dataset credits in the post).
 
 Usage: python scripts/make_showcase.py [--only 1 3]
@@ -8,8 +8,9 @@ Writes to cache/video/showcase/ (dataset imagery, not committed, D-323):
   01_tracking.mp4        fine-tuned detector + tuned BoT-SORT on four VisDrone validation clips;
                          a box and identity number per track, one colour per identity
   02_before_after.mp4    the same clips side by side: pretrained (left), fine-tuned (right)
-  03_ranging_oblique.mp4 AU-AIR held-out clip 20 (frames 40-158): range +/- sigma per vehicle, coloured by
-                         reliability (green reliable, amber uncertain), ground rings 10/25/50/100 m
+  03_ranging_oblique.mp4 AU-AIR held-out clip 20 (frames 40-158): range +/- sigma per vehicle,
+                         coloured by reliability (green reliable, amber uncertain), ground
+                         rings 10/25/50/100 m
   04_ranging_overhead.mp4 AU-AIR held-out clip 44, straight down, same overlay
   05_range_flag.mp4      Mid-Air development flight 0026: range samples stuck to the ground
                          (projected with the drone's pose in every frame); green flag quiet,

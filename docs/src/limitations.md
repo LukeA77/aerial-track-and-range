@@ -1,6 +1,6 @@
-**DRAFT.** Measured limits are filled from `results/` (R1); every limit here is also reported in the brief (R6).
-
 # Limitations
+
+*Measured limits are filled from `results/`; every limit here is also reported in the brief.*
 
 ## Distance estimation (ranging)
 

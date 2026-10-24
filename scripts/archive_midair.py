@@ -12,7 +12,7 @@ and SHA-256 of the copy against the original, then delete the local frame. The s
 growing (backlog above its starting size), so the laptop disk cannot fill up.
 --restore: copy archived frames back, verified the same way, and remove the `.archived` marker
 (the Drive copy is kept).
-Luke authorised writing to the Drive folder on 2026-10-19 (BLOCKED.md, memory).
+Writing to the archive folder was authorised on 2026-10-19.
 """
 
 from __future__ import annotations

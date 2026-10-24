@@ -24,7 +24,7 @@ The offset is not constant within a flight, so any range that uses the altimeter
 
 ## 4. Distortion (`{{DIST_COEFFS_AUAIR}}`)
 
-No visible curvature of straight lines in any clip (Luke's labels, D-504), but the tilt test shows distortion matters for geometry fitted over the whole frame: restricting to the central 60 % moved the straight-down estimate of clip 0 from 85° to 88.5° (D-514). No coefficients are fitted; analyses that depend on precise geometry use the central region. A numerical test against image radius (build.md 8.3.3) is still to do.
+No visible curvature of straight lines in any clip (the manual labels, D-504), but the tilt test shows distortion matters for geometry fitted over the whole frame: restricting to the central 60 % moved the straight-down estimate of clip 0 from 85° to 88.5° (D-514). No coefficients are fitted; analyses that depend on precise geometry use the central region. A numerical test against image radius (build.md 8.3.3) is still to do.
 
 ## 5. Orientation (`{{CAMERA_TILT_DEG_BY_CLIP}}`)
 

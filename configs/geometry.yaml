@@ -22,7 +22,7 @@ kalman_q:
 terrain_motion:
   value: {frame_gaps: [1, 2, 5, 10], max_features: 1500, quality: 0.01, min_distance_px: 8, fb_max_px: 1.0, k_nearest: 30, min_support: 10, neighbours: image}
   placeholder: TERRAIN_MOTION
-  source: "New (plan D). Claude 2026-10-19, development trajectory 0002 exploration: gaps 1-2 track near ground, 5-10 give parallax for far ground (per-feature selection, D-401). Detector and tracker values are common OpenCV settings, not tuned; k_nearest and min_support to be checked on the full development split. neighbours=image chosen on development trajectories 0003, 0016, 0029 (D-405)."
+  source: "New (plan D). 2026-10-19, development trajectory 0002 exploration: gaps 1-2 track near ground, 5-10 give parallax for far ground (per-feature selection, D-401). Detector and tracker values are common OpenCV settings, not tuned; k_nearest and min_support to be checked on the full development split. neighbours=image chosen on development trajectories 0003, 0016, 0029 (D-405)."
 terrain_sigma_px_by_gap:
   value: {"1": 0.125, "2": 0.149, "5": 0.19, "10": 0.23}
   placeholder: TERRAIN_SIGMA_PX

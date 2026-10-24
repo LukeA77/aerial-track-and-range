@@ -1,43 +1,31 @@
-# Training the detector on a free Kaggle GPU (step by step)
+# Fine-tuning the detector on a cloud GPU
 
-This trains baseline B2: our detector, fine-tuned on drone images. It takes about 1 hour per pass on the laptop CPU, so a cloud GPU is much faster. You do the upload and the run; the project never uploads anything itself.
+Baseline B2 fine-tunes a COCO-pretrained YOLO26 detector on VisDrone-DET. One epoch takes about an hour on a laptop CPU and minutes on a GPU, so training runs in a Kaggle notebook (any GPU notebook works the same way). Nothing in the repository uploads data; the package is uploaded by hand.
 
-## 1. The file to upload (already made)
+## 1. Package the data
 
-- `cache/gpu_package/visdrone_yolo.zip`, about 1.6 GB.
-- Its fingerprint (SHA-256) is in `cache/gpu_package/manifest.json`. You don't need to check it; it's there if anything looks wrong.
-- It contains 6,414 training images and 527 validation images. The 78 images that overlap the test videos are already removed.
+```bash
+python scripts/package_for_gpu.py
+```
 
-## 2. Put it on Kaggle as a PRIVATE dataset
+This writes `cache/gpu_package/visdrone_yolo.zip` (about 1.6 GB: 6,414 training and 527 validation images in YOLO format, with the 78 images that overlap the tracking test videos removed, D-308) and `manifest.json` with the counts and the zip's SHA-256.
 
-1. Sign in at https://www.kaggle.com, then go to **Datasets → New Dataset**.
-2. Drag in `visdrone_yolo.zip` and name it `visdrone-yolo`.
-3. **Set visibility to Private.** VisDrone has no stated licence, so it must not be shared publicly.
-4. Click **Create**. Kaggle unzips it for you, which takes a few minutes.
+## 2. Upload it as a private dataset
 
-## 3. Run the training
+VisDrone has no stated licence, so the package is uploaded as a **private** Kaggle dataset (for example `visdrone-yolo`) and never shared.
 
-1. Go to **Code → New Notebook**.
-2. **Switch the GPU on.** In the right-hand panel, open **Session options** and set **Accelerator** to **GPU T4 x2** or **GPU P100**.
-   - If no GPU option appears, verify your phone number in your Kaggle account settings; Kaggle only allows GPUs after that.
-3. Also in the panel, under **Input → Add Input**, add your private `visdrone-yolo` dataset.
-4. In the panel, turn **Internet** on.
-5. Copy the whole of `gpu/train_b2_kaggle.py` into the first cell.
-6. Run it in the background so it keeps going when you close the browser: click **Save Version**, choose **Save & Run All (Commit)**, then **Save**. The run continues on Kaggle's side (up to Kaggle's session limit), and its outputs are kept with that version.
-7. Check it's really using the GPU, by opening the running version's log:
-   - near the top, `device:` must name a GPU (for example `Tesla T4`). The script now stops with "NO GPU FOUND" if there is none;
-   - in the training lines, the `GPU_mem` column must show a value above `0G`;
-   - each pass (epoch) should take minutes, not an hour.
-8. It trains for at most 50 passes and stops early once the validation score stops improving (D-315).
+## 3. Train
 
-## 4. Bring the results back
+In a new notebook: enable a GPU accelerator and internet access, add the private dataset as an input, and paste one of the training scripts into a cell:
 
-1. When it finishes, download `B2_yolo26n_640_outputs.zip`.
-2. If you used Save Version, the file is in that version's **Output** tab.
-3. Unzip it into this project's `cache/train/` folder, so that you have `cache/train/B2_yolo26n_640/weights/best.pt`.
-4. Tell Claude. The next steps (scoring on the validation videos, tracking, the before/after comparison) run locally from there.
+| Script | Model | Input size |
+|---|---|---|
+| `gpu/train_b2_kaggle.py` | YOLO26n | 640 |
+| `gpu/train_b2_kaggle_n960.py` | YOLO26n | 960 (the model used in the results) |
+| `gpu/train_b2_kaggle_s640.py` | YOLO26s | 640 |
 
-## Costs
+Run it with **Save & Run All** so it continues in the background. The script stops with an error if no GPU is visible. Training runs for at most 50 epochs and stops early once validation mAP has not improved for 10 (D-315).
 
-- Kaggle's GPU time is free within a weekly quota, which should be enough for this run.
-- If you choose a paid service instead, the same script works on Colab: upload the zip to Google Drive, unzip it in the notebook, and run the script.
+## 4. Bring the weights back
+
+Download the run's output archive and unzip it into `cache/train/`, so that `cache/train/<run>/weights/best.pt` exists. Validation scoring, tracking and the comparisons then run locally (`docs/runbook.md`, Phase 3).

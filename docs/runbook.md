@@ -9,7 +9,7 @@ Commands run from the repository root with the project virtual environment. On W
 2. Check the data: `python scripts/check_data.py`. Then record checksums for the data cards with `python scripts/data_manifest.py`, which is heavy on disk; run it when nothing else is reading the data.
 3. Development and calibration evaluation and analysis: `make midair-eval`. Without make, run the five commands under `midair-eval` in the Makefile.
 4. Review the development figures in `results/midair/development/figures/`. Revisit the D-209 sampling values only if bins are under-populated, and record any change.
-5. Decide `{{ERR_THRESHOLD_FRAC}}` (BLOCKED.md), then fit on calibration:
+5. Set `{{ERR_THRESHOLD_FRAC}}` (D-314), then fit on calibration:
    `python scripts/midair_calibrate.py --level mid --base oracle_plane`
 6. Freeze. Record the fitted values from `results/midair/calibration_fit.json` in `configs/uncertainty.yaml` and `configs/geometry.yaml`, with sources.
 7. Test split, once:
@@ -39,7 +39,7 @@ Commands run from the repository root with the project virtual environment. On W
 1. Prepare the data: `make visdrone-prep` (the overlap check, then the MOT ground truth and the YOLO set with the leakage exclusion, D-308).
 2. B0 is done for YOLO26n at 640 with ByteTrack. Other B0 variants follow the same pattern:
    `python scripts/track_eval.py --run B0_<tag> --weights weights/yolo26n.pt --class-map coco --imgsz 640 --tracker configs/trackers/bytetrack.yaml`
-3. B2, fine-tuning. This needs a compute decision (BLOCKED.md):
+3. B2, fine-tuning. Run on a GPU (`docs/gpu_training.md`):
    `python scripts/train_detector.py --name B2_yolo26n_640 --model yolo26n.pt --imgsz 640`
    Then track with `--weights cache/train/B2_yolo26n_640/weights/best.pt --class-map visdrone10`.
 4. B3 tiled inference, the tracker grid, and the pixel-noise fit (`{{SIGMA_PIX_MODEL}}`) are all on val.
@@ -59,7 +59,7 @@ Commands run from the repository root with the project virtual environment. On W
 
 ## AU-AIR (Phase 4)
 
-1. `python scripts/inspect_auair.py`; `python scripts/auair_frames.py`; `python scripts/contact_sheets.py` (Luke labels `docs/auair_clip_notes.md`); `python scripts/auair_labels.py`.
+1. `python scripts/inspect_auair.py`; `python scripts/auair_frames.py`; `python scripts/contact_sheets.py` (the author labels `docs/auair_clip_notes.md`); `python scripts/auair_labels.py`.
 2. Detector and tracker on all clips: `python scripts/auair_track.py --run B2_yolo26n_960 --weights cache/train/B2_yolo26n_960/weights/best.pt --imgsz 960`.
 3. Camera model on calibration recordings: `python scripts/auair_scale.py`.
 4. Stationary segments: `python scripts/auair_stationary.py --run B2_yolo26n_960` and `--run truth --noise-from B2_yolo26n_960`.
